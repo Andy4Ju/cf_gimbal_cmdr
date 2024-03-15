@@ -59,6 +59,8 @@ cd (current_folder)
 pip3 install --user ./
 ```
 
+install numpy and other libraries.
+
 #### Crazyflie clients
 
 `git clone` from Github.
