@@ -7,6 +7,9 @@ This repository contains crazyflie-based gimbal commander run on a host PC (deve
 
 TBW
 
+### install the usb driver for CrazyFlie dongle
+https://www.bitcraze.io/documentation/repository/crazyradio-firmware/master/building/usbwindows/
+
 
 ### Communication with Crazyflie
 
