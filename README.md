@@ -78,11 +78,24 @@ You can choose either Simulink-based method or directly write C code.
 
 git clone from my repositoty: https://github.com/SFWen2/crazyflie-firmware-LL.git
 
+![image](https://github.com/SFWen2/cf_gimbal_cmdr/assets/146141804/3d2166d7-f7f5-4a57-80aa-81995d400973)
+
+The Gimbal2D controller template is set to be used for alpha-beta control.
+
+The reference can be found here:
+
+[An Over-Actuated Multi-Rotor Aerial Platform and Iterative Learning Control Applications](https://escholarship.org/uc/item/4pb023fz)
+
+
+
 Navigate to `crazyflie-firmware/src/modules/src/controller/controller_Gimbal2D.c`.
 
 find the function: void Gimbal2D_controller(){}, you can modify the control law here.
 
-![image](https://github.com/SFWen2/cf_gimbal_cmdr/assets/146141804/3d2166d7-f7f5-4a57-80aa-81995d400973)
+for example, if you want to do P controller, here's what it looks like:
+
+![image](https://github.com/SFWen2/cf_gimbal_cmdr/assets/146141804/b1ad2a65-a96a-4dd1-a497-b68b7e34104e)
+
 
 The data structure in controller_Gimbal2D.h:
 
@@ -95,6 +108,9 @@ The runtime function in controller_Gimbal2D.c is already set and running in 500H
 If you need to add parameters/debug states such that you can monitor them from python script, scroll to the end of `/controller_Gimbal2D.c`. 
 
 You can add some variables with the name you want.
+
+
+
 
 
 ### Design in Simulink
