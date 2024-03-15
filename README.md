@@ -84,6 +84,17 @@ find the function: void Gimbal2D_controller(){}, you can modify the control law 
 
 ![image](https://github.com/SFWen2/cf_gimbal_cmdr/assets/146141804/3d2166d7-f7f5-4a57-80aa-81995d400973)
 
+The data structure in controller_Gimbal2D.h:
+
+Gimbal_U has all the input information from communications
+Gimbal_Y has all the state information
+Gimbal_P has all the parameters
+
+The runtime function in controller_Gimbal2D.c is already set and running in 500Hz, only the controller function needs to be modified.
+
+If you need to add parameters/debug states such that you can monitor them from python script, scroll to the end of `/controller_Gimbal2D.c`. 
+
+You can add some variables with the name you want.
 
 
 ### Design in Simulink
