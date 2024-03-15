@@ -184,6 +184,8 @@ Crazyflie configuration:
 cd crazyflie-firmware-LL
 make
 ```
+(if you have some error while making, check if you have followed all instructions on https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/building-and-flashing/build/)
+
 
 * Connect crazyradio PA; long-press button on QC for 1.5 sec (enter load mode), you will see only the two blue LED blinking.
 
