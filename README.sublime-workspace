@@ -1,0 +1,224 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"pm",
+				"Project Manager"
+			],
+			[
+				"packconin",
+				"Package Control: Install Package"
+			],
+			[
+				"packa",
+				"Install Package Control"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/paul/crazyflie-firmware/src/modules/src/controller_pid.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/power_distribution_stock.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/stabilizer.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/controller_mellinger.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/controller_quaternion.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/crtp_commander_generic.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/controller.c",
+		"/home/paul/crazyflie-firmware/src/modules/interface/stabilizer.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/power_distribution.h",
+		"/home/paul/crazyflie-firmware/src/modules/src/Quaternion_controller_ert_rtw/Quaternion_controller.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/stabilizer_types.h",
+		"/home/paul/crazyflie-firmware/src/drivers/interface/motors.h",
+		"/home/paul/crazyflie-firmware/src/modules/src/PID_controller_ert_rtw/PID_controller.h",
+		"/home/paul/crazyflie-firmware/src/modules/src/PID_controller_ert_rtw/html/PID_controller_interface.html",
+		"/home/paul/crazyflie-firmware/src/modules/src/Quaternion_controller_ert_rtw/html/Quaternion_controller_interface.html",
+		"/home/paul/crazyflie-firmware/src/modules/src/Quaternion_controller_ert_rtw/Quaternion_controller.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/rotor_combined_controller_ert_rtw/rotor_combined_controller.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/math3d.h",
+		"/home/paul/crazyflie-firmware/src/modules/src/crtp_commander_rpyt.c",
+		"/home/paul/crazyflie-firmware/src/hal/interface/imu_types.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/crtp.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/crtp_commander.h",
+		"/home/paul/crazyflie-firmware/src/modules/src/crtp_commander.c",
+		"/home/paul/crazyflie-firmware/src/modules/interface/controller.h",
+		"/home/paul/crazyflie-firmware/docs/logparam.md",
+		"/home/paul/crazyflie-firmware/src/modules/src/system.c",
+		"/home/paul/crazyflie-firmware/src/modules/src/crtp_localization_service.c",
+		"/home/paul/crazyflie-firmware/src/modules/interface/log.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/controller_quaternion.h",
+		"/home/paul/crazyflie-firmware/src/modules/interface/quatcompress.h",
+		"/home/paul/crazyflie-lib-python/cflib/crazyflie/commander.py",
+		"/home/paul/crazyflie-lib-python/examples/basiclog.py",
+		"/home/paul/crazyflie-lib-python/examples/MotionCap_scripts/DroneControl_crazyflie/rotor_combined_controller.py",
+		"/home/paul/crazyflie-lib-python/examples/ramp.py",
+		"/home/paul/crazyflie-lib-python/examples/MotionCap_scripts/DroneControl_crazyflie/rotor_combined.py",
+		"/home/paul/crazyflie-lib-python/examples/MotionCap_scripts/DroneControl_crazyflie/rotor_combined_logger.py",
+		"/home/paul/crazyflie-lib-python/examples/MotionCap_scripts/DroneControl_crazyflie/keyboard.py",
+		"/home/paul/crazyflie-lib-python/examples/MotionCap_scripts/DroneControl_crazyflie/Optitrack.py",
+		"/home/paul/crazyflie-lib-python/examples/MotionCap_scripts/DroneControl_crazyflie/rotor_combined_gui.py",
+		"/home/paul/crazyflie-lib-python/examples/rotor_combined.py"
+	],
+	"find":
+	{
+		"height": 26.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 38.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "README.sublime-project",
+	"replace":
+	{
+		"height": 48.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"cq",
+				"src/modules/src/controller_quaternion.c"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 341.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
