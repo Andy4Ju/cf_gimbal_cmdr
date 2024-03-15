@@ -3,6 +3,19 @@
 
 This repository contains crazyflie-based gimbal commander run on a host PC (developed by [MACLAB](http://www.maclab.seas.ucla.edu/)). 
 
+### Communication with Crazyflie
+
+Examples in `./examples`
+
+Define new communication command package: 
+
+* Make changes in `./cflib/crazyflie/commander.py`.
+
+* Config cflib:
+```
+cd (current_folder)
+pip3 install --user ./
+```
 
 #### Set up Sublime to use Python3
 
@@ -48,6 +61,14 @@ pip3 install --user ./
 Install required python packages, referring to `README`.
 
 
+### FAQ (python script, sending command... etc)
+
+#### How to modify the command trajectory in Python Script?
+TBW
+
+#### How to modify the controller gains in Python Script?
+TBW
+
 
 ## Low-level controller design and uploading
 
@@ -55,7 +76,14 @@ You can choose either Simulink-based method or directly write C code.
 
 ### C code template
 
-git clone from my repositoty:
+git clone from my repositoty: https://github.com/SFWen2/crazyflie-firmware-LL.git
+
+Navigate to `crazyflie-firmware/src/modules/src/controller/controller_Gimbal2D.c`.
+
+find the function: void Gimbal2D_controller(){}, you can modify the control law here.
+
+![image](https://github.com/SFWen2/cf_gimbal_cmdr/assets/146141804/3d2166d7-f7f5-4a57-80aa-81995d400973)
+
 
 
 ### Design in Simulink
@@ -111,15 +139,16 @@ Crazyflie configuration:
 
 	Or in motor commands, `motorSetRatio()`.
 
+
 #### Make code and upload
 
 * 
 ```
-cd crazyflie-firmware
+cd crazyflie-firmware-LL
 make
 ```
 
-* Connect crazyradio PA; long-press button on QC for 1.5 sec (enter load mode).
+* Connect crazyradio PA; long-press button on QC for 1.5 sec (enter load mode), you will see only the two blue LED blinking.
 
 * 
 ```
@@ -135,21 +164,10 @@ make clean
 and proceed again.
 
 
+### FAQ (controller implementation, build, upload... etc)
 
 
 
-## High-level controller design and implementation
 
-### Communication with Crazyflie
 
-Examples in `./examples`
 
-Define new communication command package: 
-
-* Make changes in `./cflib/crazyflie/commander.py`.
-
-* Config cflib:
-```
-cd (current_folder)
-pip3 install --user ./
-```
