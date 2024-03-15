@@ -3,6 +3,11 @@
 
 This repository contains crazyflie-based gimbal commander run on a host PC (developed by [MACLAB](http://www.maclab.seas.ucla.edu/)). 
 
+### install git
+
+TBW
+
+
 ### Communication with Crazyflie
 
 Examples in `./examples`
