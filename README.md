@@ -1,34 +1,8 @@
 # Installation Guide
 ### Setting up environment, designing controller and implement on Crazyflie
 
-This repository contains high-level controllers run on a Linux host PC for multi-quadcopter aerial platforms (Hinge/Gimbal Platforms developed by [MACLAB](http://www.maclab.seas.ucla.edu/)). Low-level controllers run on each Crazyflie quadcopter are in another repository "crazyflie-firmware".
+This repository contains crazyflie-based gimbal commander run on a host PC (developed by [MACLAB](http://www.maclab.seas.ucla.edu/)). 
 
-**features:** 
-
-* Optitrack system is used.
-* Low-level on-board controller is designed in Simulink. Embedded code generator is used to generate c code and upload to Crazyflie.
-* 2 Crazyradio-PA dongles. Each communicates with 2 quadcopters.
-
-## Environment setup in Ubuntu 18.04
-
-#### Packages 
-
-System:
-```
-sudo apt-get update
-sudo apt-get install python3
-sudo apt-get install python3-pip
-sudo apt-get install git
-```
-
-Packages for Python:
-```
-python3 -mpip install matplotlib
-sudo apt-get install python3-tk
-pip3 install transformations
-pip3 install qpsolvers
-pip3 install cvxopt
-```
 
 #### Set up Sublime to use Python3
 
@@ -61,21 +35,11 @@ Save file as `Python3.sublime-build`.
 
 #### Crazyflie Python API
 
-`git clone` from my Github.
-
-Setting udev permissions for USB Crazyradio PA, referring to `README`.
-
 Config crazyflie library:
 ```
 cd (current_folder)
 pip3 install --user ./
 ```
-
-#### Crazyflie firmware
-
-`git clone` from my Github.
-
-Install toolchain for compiling and uploading c codes to ARM firmware, referring to `README`.
 
 #### Crazyflie clients
 
@@ -83,26 +47,16 @@ Install toolchain for compiling and uploading c codes to ARM firmware, referring
 
 Install required python packages, referring to `README`.
 
-#### MATLAB R2018a (Deprecated)
-
-Notice: MATLAB R2019b has bugs when using Simulink related to connection to localhost
-
-Follow guides to install MATLAB R2018a.
-
-Use `sudo ln -s /usr/local/MATLAB/R2018a/bin/matlab matlab` to start MATLAB from console
-
-##### Matlab Linux workspace
-
-`git clone` from my Github.
-
-##### Python Matlab API
-
-search online for installation.
-
-
 
 
 ## Low-level controller design and uploading
+
+You can choose either Simulink-based method or directly write C code.
+
+### C code template
+
+git clone from my repositoty:
+
 
 ### Design in Simulink
 
@@ -199,16 +153,3 @@ Define new communication command package:
 cd (current_folder)
 pip3 install --user ./
 ```
-
-### Communication with Simulink (Deprecated)
-
-Online example: [Controlling a Simulink Model by a Python Controller](https://medium.com/@soutrikbandyopadhyay/controlling-a-simulink-model-by-a-python-controller-2b67bde744ee)
-
-Example in `matlab_qc_linux/real_4qc/ab_ramp_simu.py`
-
-* Data from Simulink to Python: 
-	* 'To Workspace' block
-	* Save format: Array
-	* Save 2-D signal as: 2-D array
-
-* Data from Python to Simulink: see example.
