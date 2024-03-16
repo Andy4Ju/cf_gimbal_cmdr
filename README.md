@@ -1,29 +1,20 @@
 # Installation Guide
-### Setting up environment, designing controller and implement on Crazyflie
+
+The purpose of this document is
+1. Establish an environment for communicating with Crazyflie quadcopters and reading data through Python scripts
+2. Create an environment for developing and burning the Crazyflie quadcopters firmware in C language
+
+## Part 1: Python script and development environment for communicating with CrazyFlie
 
 This repository contains crazyflie-based gimbal commander run on a host PC (developed by [MACLAB](http://www.maclab.seas.ucla.edu/)). 
 
-### install git
+As a beginner, you may need the following tools installed on your machine:
+1. Download the code from this repository
+2. [python3](https://www.python.org/downloads/) and text editor (sublime / [VS code](https://code.visualstudio.com/)..)
+3. [CrazyFlie Dongle USB Driver](https://www.bitcraze.io/documentation/repository/crazyradio-firmware/master/building/usbwindows/)
+4. Optional: [git](https://github.com/git-guides/install-git) for version control
+5. Optional: [cfclient](https://www.bitcraze.io/documentation/repository/crazyflie-clients-python/master/) for testing
 
-TBW
-
-### install the usb driver for CrazyFlie dongle
-https://www.bitcraze.io/documentation/repository/crazyradio-firmware/master/building/usbwindows/
-
-
-### Communication with Crazyflie
-
-Examples in `./examples`
-
-Define new communication command package: 
-
-* Make changes in `./cflib/crazyflie/commander.py`.
-
-* Config cflib:
-```
-cd (current_folder)
-pip3 install --user ./
-```
 
 #### Set up Sublime to use Python3
 
@@ -54,6 +45,7 @@ In Sublime click `Tools -> Build System -> New Build System`, and paste (python3
 
 Save file as `Python3.sublime-build`.
 
+
 #### Crazyflie Python API
 
 Config crazyflie library:
@@ -64,12 +56,27 @@ pip3 install --user ./
 
 install numpy and other libraries.
 
+
 #### Crazyflie clients
 
 `git clone` from Github.
 
 Install required python packages, referring to `README`.
 
+
+### Communication with Crazyflie
+
+Examples in `./examples`
+
+Define new communication command package: 
+
+* Make changes in `./cflib/crazyflie/commander.py`.
+
+* Config cflib:
+```
+cd (current_folder)
+pip3 install --user ./
+```
 
 ### FAQ (python script, sending command... etc)
 
@@ -80,7 +87,7 @@ TBW
 TBW
 
 
-## Low-level controller design and uploading
+## Part 2: Setting up environment, designing controller and implement on Crazyflie
 
 You can choose either Simulink-based method or directly write C code.
 
@@ -92,10 +99,9 @@ git clone from my repositoty: https://github.com/SFWen2/crazyflie-firmware-LL.gi
 
 The Gimbal2D controller template is set to be used for alpha-beta control.
 
-The reference can be found here:
+The reference for gimbal design and dynamic equations deriving can be found here:
 
 [An Over-Actuated Multi-Rotor Aerial Platform and Iterative Learning Control Applications](https://escholarship.org/uc/item/4pb023fz)
-
 
 
 Navigate to `crazyflie-firmware/src/modules/src/controller/controller_Gimbal2D.c`.
@@ -118,8 +124,6 @@ The runtime function in controller_Gimbal2D.c is already set and running in 500H
 If you need to add parameters/debug states such that you can monitor them from python script, scroll to the end of `/controller_Gimbal2D.c`. 
 
 You can add some variables with the name you want.
-
-
 
 
 
