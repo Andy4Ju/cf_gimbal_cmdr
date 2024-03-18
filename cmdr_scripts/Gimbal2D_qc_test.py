@@ -3,140 +3,24 @@ Single Crazyflie test
 """
 import logging
 import time
-import os
 import sys
-import csv
 import numpy as np
-import matplotlib.pyplot as plt
 from threading import Thread
 from cflib.crazyflie.log import LogConfig
+from logger import ab_logger
+from ReferenceGenerator import StepReferenceGenerator
+from ReferenceGenerator import TrajReferenceGenerator
 
 import cflib
 from cflib.crazyflie import Crazyflie
+from parameter import URL, CONTROLLER, REFTYPE
 
 logging.basicConfig(level=logging.ERROR)
 
+THRUST_CONST = 0.3 # 0 ~ 0.6
 CMD_RATE = 0.005
-
-class ab_logger:
-	"""
-	logger class. record data and export to a csv file
-	"""
-	def __init__(self, folder_name='log_files'):
-		self.folder_name = folder_name
-		self.log_memory = [["timestamp", "alpha_d", "beta_d", "data_a", "data_b", "data_c", "data_d", "roll", "pitch", "yaw"]]
-
-	def log_append(self, timestamp, ad, bd, da, db, dc, dd, r, p, y):
-		"""
-		timestamp = round(timestamp,3)
-		e = round(e,3)
-		d = round(d,3)
-		"""
-		self.log_memory.append([timestamp, ad, bd, da, db, dc, dd, r, p, y])
-
-	def savelog(self):
-		# print(self.log_memory)
-		try:
-			# Create target Directory
-			os.mkdir(self.folder_name)
-			print("Directory \"" + self.folder_name +  "\" Created ") 
-		except:
-			# print("Directory " + self.folder_name +  " already exists")
-			pass
-			
-		with open(self.folder_name + '/log_' + time.strftime("%m%d_%H%M%S") + '.txt', 'w') as csvfile:
-			writer = csv.writer(csvfile)
-			writer.writerows(self.log_memory)
-			print("CSV file: " + "log_" + time.strftime("%m%d_%H%M%S") + ".txt" + " created")
-
-	def _getStepInfo(self, ref, fbk, Ts):
-		l = len(ref)
-		Step_Value = 0
-		for x in range(2, l):
-			if ref[x] != 0 and ref[x-1] == 0:
-				t0_tick = x
-				Step_Value = ref[x]
-			if ref[x] == 0 and ref[x-1] != 0:
-				tf_tick = x
-
-		if Step_Value != 0:
-			Tr0_tick = 0
-			Trf_tick = 0
-			Ymax = 0
-			for y in range(t0_tick, tf_tick):
-				if abs(fbk[y]) > abs(0.1 * Step_Value) and abs(fbk[y-1]) <= abs(0.1 * Step_Value) and Tr0_tick == 0:
-					Tr0_tick = y
-				if abs(fbk[y]) > abs(0.9 * Step_Value) and abs(fbk[y-1]) <= abs(0.9 * Step_Value) and Trf_tick == 0:
-					Trf_tick = y
-				if abs(fbk[y]) > Ymax:
-					Ymax = fbk[y]
-			if Tr0_tick != 0 and Trf_tick != 0:
-				Tr = (Trf_tick - Tr0_tick) * Ts
-			else:
-				Tr = -1
-			Mp = (Ymax / Step_Value - 1) * 100
-		else:
-			Tr = 0
-			Mp = 0
-   
-		# print('Tr0_tick = %s, Trf_tick = %s'%(Tr0_tick, Trf_tick))
-		# print('Ymax = ',Ymax)
-		return [Tr, Mp]
-
-	def plot(self):
-		n = len(self.log_memory)
-		# print('log_memory len = ', n)
-		log_memory_array = np.asarray(self.log_memory[1:n])
-		timestamp = (log_memory_array[:, 0] - log_memory_array[0, 0]) * 0.001
-		m = len(timestamp)
-		# print('timestamp len = ', m)
-		ad = log_memory_array[:, 1]
-		bd = log_memory_array[:, 2]
-		da = log_memory_array[:, 3]
-		db = log_memory_array[:, 4]
-		dc = log_memory_array[:, 5]
-		dd = log_memory_array[:, 6]
-		r = log_memory_array[:, 7]
-		p = log_memory_array[:, 8]
-		y = log_memory_array[:, 9]
-
-		[Alpha_Tr, Alpha_Mp] = self._getStepInfo(ad, da, CMD_RATE)
-		[Beta_Tr, Beta_Mp] = self._getStepInfo(bd, dc, CMD_RATE)
-
-		print('Alpha_Tr = %s seconds, Alpha_Mp = %s percent'%(Alpha_Tr, Alpha_Mp))
-		print('Beta_Tr = %s seconds, Beta_Mp = %s percent'%(Beta_Tr, Beta_Mp))
-
-		plt.subplot(211)
-		plt.plot(timestamp, ad, 'b--', timestamp, da, 'k')
-		plt.ylabel('angle (rad)')
-		plt.title('alpha')
-		plt.legend(['alpha_ref','alpha'])
-		plt.grid(True)
-
-		plt.subplot(212)
-		plt.plot(timestamp, bd, 'b--', timestamp, dc, 'k')
-		plt.ylabel('angle (rad)')
-		plt.title('beta')
-		plt.legend(['beta_ref','beta'])
-		plt.grid(True)
-
-		# alpha_error = ad - da
-		# beta_error = bd - dc
-		# plt.subplot(211)
-		# plt.plot(timestamp, ad, 'b--', timestamp, da, 'k', timestamp, alpha_error, 'r')
-		# plt.ylabel('angle (rad)')
-		# plt.title('alpha')
-		# plt.legend(['alpha_ref','alpha','error'])
-		# plt.grid(True)
-
-		# plt.subplot(212)
-		# plt.plot(timestamp, bd, 'b--', timestamp, dc, 'k', timestamp, beta_error, 'r')
-		# plt.ylabel('angle (rad)')
-		# plt.title('beta')
-		# plt.legend(['beta_ref','beta','error'])
-		# plt.grid(True)
-
-		plt.show()
+DATA_FOLDER_NAME = 'log_'+time.strftime("%m%d")
+REF_TYPE = 1
 class CrazyflieGimbal2D:
 	def __init__(self, link_uri, index):
 		""" Initialize and run the example with the specified link_uri """
@@ -167,7 +51,7 @@ class CrazyflieGimbal2D:
 		self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
 							'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs']
   
-		self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 240, 240, 5.5, 280, 280, 6.3]
+		self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 200, 200, 6.3]
 
 	def _connected(self, link_uri):
 
@@ -262,124 +146,6 @@ class CrazyflieGimbal2D:
 		self._cf.commander.send_stop_setpoint()
 		self._cf.close_link()
 
-class StepReferenceGenerator:
-	def __init__(self):
-		self.alpha = 0
-		self.beta = 0
-		self.thrust = 0 # 42598
-		self.thrust_constant = 0.44
-		self.controller_rate = 0.01
-
-		self.controller_start_time = time.time()
-		self.stop_controller = False
-
-		print("controller_start_time = %s" % self.controller_start_time)
-
-	def run(self):
-		last_loop_time = time.time()
-		while not self.stop_controller:
-			current_time = time.time()
-			if current_time - last_loop_time > self.controller_rate:
-				if current_time - self.controller_start_time < 0:
-					self.alpha = 0
-					self.beta = 0
-					self.thrust = 0
-				elif current_time - self.controller_start_time < 1:
-					self.alpha = 0
-					self.beta = 0
-					self.thrust = self.thrust_constant
-				elif current_time - self.controller_start_time < 2:
-					self.alpha = 0.4
-					self.beta = 0
-					self.thrust = self.thrust_constant	
-				elif current_time - self.controller_start_time < 4:
-					self.alpha = 0
-					self.beta = 0
-					self.thrust = self.thrust_constant
-				elif current_time - self.controller_start_time < 5:
-					self.alpha = 0
-					self.beta = 0.4
-					self.thrust = self.thrust_constant
-				elif current_time - self.controller_start_time < 6:
-					self.alpha = 0.0
-					self.beta = 0.0
-					self.thrust = self.thrust_constant
-				else:
-					self.alpha = 0; self.beta = 0; self.thrust = 0
-				last_loop_time = current_time
-			else:
-				time.sleep(0.002)
-class TrajReferenceGenerator:
-	def __init__(self):
-		self.alpha = 0
-		self.beta = 0
-		self.thrust = 0 # 42598
-		self.thrust_constant = 0.16
-		self.controller_rate = 0.01
-
-		self.controller_start_time = time.time()
-		self.stop_controller = False
-
-		print("controller_start_time = %s" % self.controller_start_time)
-
-	def run(self):
-		last_loop_time = time.time()
-		while not self.stop_controller:
-			current_time = time.time()
-			if current_time - last_loop_time > self.controller_rate:
-				tnow = current_time - self.controller_start_time
-				self.test_thrust(tnow)
-				last_loop_time = current_time
-			else:
-				time.sleep(0.002)
-    
-	def test_thrust(self, tnow):
-		print('tnow = ', tnow)
-		if tnow < 3:
-			self.alpha = 0
-			self.beta = 0
-			self.thrust = self.thrust_constant*tnow/3
-		elif tnow < 6:
-			self.alpha = 0
-			self.beta = 0
-			self.thrust = self.thrust_constant
-		elif tnow < 9:
-			self.alpha = 0
-			self.beta = 0
-			self.thrust = self.thrust_constant*(1-(tnow-6)/3)
-		else:
-			self.alpha = 0; self.beta = 0; self.thrust = 0
-	
-	def test_betalpha(self, tnow):
-		if tnow < 3:
-			self.alpha = 0
-			self.beta = 0
-			self.thrust = self.thrust_constant*tnow/3
-		elif tnow < 6:
-			self.alpha = 0
-			self.beta = np.pi/4*(tnow-3)/3
-			self.thrust = self.thrust_constant
-		elif tnow < 9:
-			self.alpha = 0
-			self.beta = np.pi/4
-			self.thrust = self.thrust_constant	
-		elif tnow < 12:
-			self.alpha = np.pi/6*(tnow-9)/3
-			self.beta = np.pi/4
-			self.thrust = self.thrust_constant
-		elif tnow < 15:
-			self.alpha = np.pi/6
-			self.beta = np.pi/4
-			self.thrust = self.thrust_constant
-		elif tnow < 18:
-			self.alpha = np.pi/6
-			self.beta = np.pi/4
-			self.thrust = self.thrust_constant*(1-(tnow-15)/3)
-		else:
-			self.alpha = 0; self.beta = 0; self.thrust = 0
-
-
-
 if __name__ == '__main__':
 
 	# Initialize the low-level drivers (don't list the debug drivers)
@@ -389,24 +155,28 @@ if __name__ == '__main__':
 	available = cflib.crtp.scan_interfaces()
 
 	if True:
-		# le = CrazyflieGimbal2D('radio://0/80/2M/E7E7E7E7E9', 0)
-		le = CrazyflieGimbal2D('radio://0/120/2M/E7E7E7E7EF', 0)
+		# le = CrazyflieGimbal2D(, 0)
+		le = CrazyflieGimbal2D(URL.QC_GREY_ORANGE_URL.value, 0)
 		time.sleep(0.25)
-		logger = ab_logger(folder_name='log_test_single_1205')
+		logger = ab_logger(CMD_RATE, folder_name=DATA_FOLDER_NAME)
 		time.sleep(4)
 
 		cmd_rate = CMD_RATE # 200Hz
 		t = 0
+		if REF_TYPE == REFTYPE.STEP.value:
+			RefGen = StepReferenceGenerator(THRUST_CONST)
+			T_final = 6
+		elif REF_TYPE == REFTYPE.RAMP.value:
+			RefGen = TrajReferenceGenerator(THRUST_CONST)
+			T_final = 20
 
-		RefGen = StepReferenceGenerator()
-		# RefGen = TrajReferenceGenerator()
 		ctrl_thread = Thread(target=RefGen.run)
 		ctrl_thread.start()
 		start_time = time.time()
 
 		print("start_time = %s" % start_time)
 
-		while t < 6:
+		while t < T_final:
 			le.alpha = RefGen.alpha
 			le.beta = RefGen.beta
 			le.thrust = RefGen.thrust
@@ -418,7 +188,6 @@ if __name__ == '__main__':
 		le._stop_crazyflie()
 		RefGen.stop_controller = True
 		logger.savelog()
-		logger.plot()
-
+		logger.plot(REF_TYPE)
 	else:
 		print('No Crazyflies found, cannot run')

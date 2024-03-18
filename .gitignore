@@ -1,3 +1,5 @@
 
 cache/*.json
+log*
 .DS_Store
+cmdr_scripts/__pycache__/*
