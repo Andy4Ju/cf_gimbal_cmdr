@@ -100,20 +100,20 @@ class TrajReferenceGenerator:
 			self.beta = np.pi/4*(tnow-3)/3
 			self.thrust = self.thrust_constant
 		elif tnow < 9:
-			self.alpha = 0
+			self.alpha = np.pi/6*(tnow-6)/3
 			self.beta = np.pi/4
 			self.thrust = self.thrust_constant	
 		elif tnow < 12:
-			self.alpha = np.pi/6*(tnow-9)/3
+			self.alpha = np.pi/6
 			self.beta = np.pi/4
 			self.thrust = self.thrust_constant
 		elif tnow < 15:
 			self.alpha = np.pi/6
-			self.beta = np.pi/4
+			self.beta = np.pi/4*(1-(tnow-12)/3)
 			self.thrust = self.thrust_constant
 		elif tnow < 18:
-			self.alpha = np.pi/6
-			self.beta = np.pi/4
-			self.thrust = self.thrust_constant*(1-(tnow-15)/3)
+			self.alpha = np.pi/6*(1-(tnow-15)/3)
+			self.beta = 0
+			self.thrust = self.thrust_constant
 		else:
 			self.alpha = 0; self.beta = 0; self.thrust = 0

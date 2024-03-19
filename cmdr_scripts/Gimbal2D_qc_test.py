@@ -1,5 +1,5 @@
 """
-Single Crazyflie test
+Gimbal controller test using crazyflie
 """
 import logging
 import time
@@ -11,18 +11,44 @@ from logger import ab_logger
 from ReferenceGenerator import StepReferenceGenerator
 from ReferenceGenerator import TrajReferenceGenerator
 
+import math
 import cflib
 from cflib.crazyflie import Crazyflie
-from parameter import URL, CONTROLLER, REFTYPE
+from parameter import URL, CONTROLLER_TYPE, REF_TYPE, LOG_TYPE
 
 logging.basicConfig(level=logging.ERROR)
 
-THRUST_CONST = 0.3 # 0 ~ 0.6
-CMD_RATE = 0.005
+'''Usage: Follow the steps before running this script'''
+'''=================================================='''
+'''=================================================='''
+'''=================================================='''
+'''Step 0: Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
+
+'''Step 1: Set the URL of your crazyflie target, add a new URL in parameter.py '''
+ControlTarget = URL.QC_GREY_ORANGE_URL.value
+
+'''Step 2: Assign Thrust Constant 0 ~ 0.6 N '''
+THRUST_CONST = 0.2
+
+'''Step 3: Assign the folder name of logged data, the default name is log_date'''
 DATA_FOLDER_NAME = 'log_'+time.strftime("%m%d")
-REF_TYPE = 1
+
+'''Step 4: Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
+RefType = REF_TYPE.REF_TYPE_STEP.value 
+
+'''Step 5: Assign the controller type, 5= singleppid, 7=gimbal2D.'''
+ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
+
+'''Step 6: Assign the date log type, angular position / velocity or pwm command'''
+LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
+
+'''Step 7: Run the script'''
+'''=================================================='''
+'''=================================================='''
+'''=================================================='''
+
 class CrazyflieGimbal2D:
-	def __init__(self, link_uri, index):
+	def __init__(self, link_uri, index, controller_type, log_type):
 		""" Initialize and run the example with the specified link_uri """
 
 		self._cf = Crazyflie(rw_cache='./cache')
@@ -41,44 +67,83 @@ class CrazyflieGimbal2D:
 		self.thrust = 0
 		self.index = index
 		self.base_q = np.array([1,0,0,0])
-
+		self.group_name = ''
+		self.set_group = ''
+		self.config_name = ''
+		self.data_a_name = ''
+		self.data_b_name = ''
+		self.data_c_name = ''
+		self.data_d_name = ''
+		self.timest = 0
 		self.data_a = 0
 		self.data_b = 0
 		self.data_c = 0
 		self.data_d = 0
-		self.timest = 0
 
-		self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
-							'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs']
-  
-		self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 200, 200, 6.3]
+		# init parameter and scopes
+		if controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value:
+			self.group_name = 'sparam_Gimbal2D'
+			self.config_name ='sctrl_Gimbal2D'
+			self.set_group = 'sparam_Gimbal2D.{}'
+			self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
+								'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs']
+			self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 200, 200, 6.3]
+			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
+				self.data_a_name = 'sctrl_Gimbal2D.alpha'
+				self.data_c_name = 'sctrl_Gimbal2D.beta'
+				self.data_b_name = 'sctrl_Gimbal2D.u_alpha'
+				self.data_d_name = 'sctrl_Gimbal2D.u_beta'
+			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
+				self.data_a_name = 'sctrl_Gimbal2D.t_m1'
+				self.data_b_name = 'sctrl_Gimbal2D.t_m2'
+				self.data_c_name = 'sctrl_Gimbal2D.t_m3'
+				self.data_d_name = 'sctrl_Gimbal2D.t_m4'
+
+		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_SINGLEPPID.value:
+			self.group_name = 'sparam_ppid'
+			self.config_name ='sctrl_ppid'
+			self.set_group = 'sparam_ppid.{}'
+			c1 = 3; c2 = 1
+			self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
+								'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs',
+								's_tx', 's_ty', 's_tz']
+			self.gain_value = [900, 15, 0, 1100, 9, 0, 
+								0.00007/c1, 0.00006/c1, 0.000003/c1, 0.00004/c2, 0.00004/c2, 0.000002/c2,
+								1,1,1]
+			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
+				self.data_a_name = 'sctrl_ppid.t_ae'
+				self.data_b_name = 'sctrl_ppid.u_alpha'
+				self.data_c_name = 'sctrl_ppid.t_be'
+				self.data_d_name = 'sctrl_ppid.u_beta'
+			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
+				self.data_a_name = 'sctrl_ppid.t_m1'
+				self.data_b_name = 'sctrl_ppid.t_m2'
+				self.data_c_name = 'sctrl_ppid.t_m3'
+				self.data_d_name = 'sctrl_ppid.t_m4'
 
 	def _connected(self, link_uri):
 
 		print('Connected to %s' % link_uri)
+		self._cf.param.add_update_callback(group=self.group_name, name=None, cb=self._param_callback)
+		# modify the controller 
+		self._cf.param.set_value('stabilizer.controller','{}'.format(ControllerType))
+		self._cf.param.add_update_callback(group='stabilizer', name='controller', cb=self._stabilizer_controller_callback)
 
 		# modify PID gains parameters
-		self._cf.param.add_update_callback(group='sparam_Gimbal2D', name=None,
-											cb=self._param_callback)
 		for n in self.gain_name:
 			ind = self.gain_name.index(n)
-			self._cf.param.set_value('sparam_Gimbal2D.{}'.format(n), '{}'.format(self.gain_value[ind]))
-			self._cf.param.remove_update_callback(group='controller_tune', name=n,
-												cb=self._param_callback)
+			self._cf.param.set_value(self.set_group.format(n), '{}'.format(self.gain_value[ind]))
+			self._cf.param.remove_update_callback(group='controller_tune', name=n, cb=self._param_callback)
 
 		# The definition of the logconfig can be made before connecting
 		self._lg_battery = LogConfig(name='pm', period_in_ms=1000)
 		self._lg_battery.add_variable('pm.vbat','float')
-		self._lg_stab = LogConfig(name='sctrl_Gimbal2D', period_in_ms=10)
+		self._lg_stab = LogConfig(name=self.config_name, period_in_ms=10)
 
-		self._lg_stab.add_variable('sctrl_Gimbal2D.alpha', 'float')
-		self._lg_stab.add_variable('sctrl_Gimbal2D.alphas', 'float')
-		self._lg_stab.add_variable('sctrl_Gimbal2D.beta', 'float')
-		self._lg_stab.add_variable('sctrl_Gimbal2D.betas', 'float')
-		# self._lg_stab.add_variable('sctrl_Gimbal2D.t_m1', 'float')
-		# self._lg_stab.add_variable('sctrl_Gimbal2D.t_m2', 'float')
-		# self._lg_stab.add_variable('sctrl_Gimbal2D.t_m3', 'float')
-		# self._lg_stab.add_variable('sctrl_Gimbal2D.t_m4', 'float')
+		self._lg_stab.add_variable(self.data_a_name, 'float')
+		self._lg_stab.add_variable(self.data_b_name, 'float')
+		self._lg_stab.add_variable(self.data_c_name, 'float')
+		self._lg_stab.add_variable(self.data_d_name, 'float')
 
 		# Adding the configuration cannot be done until a Crazyflie is
 		# connected, since we need to check that the variables we
@@ -103,6 +168,9 @@ class CrazyflieGimbal2D:
 
 	def _param_callback(self, name, value):
 		print('Readback: {0}={1}'.format(name, value))
+  
+	def _stabilizer_controller_callback(self, name, value):
+		print('Readback: {0}={1}'.format(name, value))
 
 	def _battery_log_data(self, timestamp, data, logconf):
 		battery_data = round(data['pm.vbat'], 1)
@@ -116,14 +184,10 @@ class CrazyflieGimbal2D:
 	def _stab_log_data(self, timestamp, data, logconf):
 		"""Callback froma the log API when data arrives"""
 		self.timest = timestamp
-		self.data_a = data["sctrl_Gimbal2D.alpha"]
-		self.data_b = data["sctrl_Gimbal2D.alphas"]
-		self.data_c = data["sctrl_Gimbal2D.beta"]
-		self.data_d = data["sctrl_Gimbal2D.betas"]
-		# self.data_a = data["sctrl_Gimbal2D.t_m1"]
-		# self.data_b = data["sctrl_Gimbal2D.t_m2"]
-		# self.data_c = data["sctrl_Gimbal2D.t_m3"]
-		# self.data_d = data["sctrl_Gimbal2D.t_m4"]
+		self.data_a = (data[self.data_a_name], 0)[math.isnan(data[self.data_a_name]) == True]
+		self.data_b = (data[self.data_b_name], 0)[math.isnan(data[self.data_b_name]) == True]
+		self.data_c = (data[self.data_c_name], 0)[math.isnan(data[self.data_c_name]) == True]
+		self.data_d = (data[self.data_d_name], 0)[math.isnan(data[self.data_d_name]) == True]
 
 	def _connection_failed(self, link_uri, msg):
 		"""Callback when connection initial connection fails (i.e no Crazyflie
@@ -153,20 +217,20 @@ if __name__ == '__main__':
 	# Scan for Crazyflies and use the first one found
 	print('Scanning interfaces for Crazyflies...')
 	available = cflib.crtp.scan_interfaces()
+	CMD_RATE = 0.005
 
 	if True:
-		# le = CrazyflieGimbal2D(, 0)
-		le = CrazyflieGimbal2D(URL.QC_GREY_ORANGE_URL.value, 0)
+		le = CrazyflieGimbal2D(ControlTarget, 0, ControllerType, LogType)
 		time.sleep(0.25)
 		logger = ab_logger(CMD_RATE, folder_name=DATA_FOLDER_NAME)
 		time.sleep(4)
 
 		cmd_rate = CMD_RATE # 200Hz
 		t = 0
-		if REF_TYPE == REFTYPE.STEP.value:
+		if RefType == REF_TYPE.REF_TYPE_STEP.value:
 			RefGen = StepReferenceGenerator(THRUST_CONST)
 			T_final = 6
-		elif REF_TYPE == REFTYPE.RAMP.value:
+		elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
 			RefGen = TrajReferenceGenerator(THRUST_CONST)
 			T_final = 20
 
@@ -184,10 +248,9 @@ if __name__ == '__main__':
 
 			t += cmd_rate
 			time.sleep(cmd_rate)
-			logger.log_append(le.timest, RefGen.alpha, RefGen.beta, le.data_a, le.data_b, le.data_c, le.data_d, 0, 0, 0)
+			logger.log_append(le.timest, RefGen.alpha, RefGen.beta, le.data_a, le.data_b, le.data_c, le.data_d)
+
 		le._stop_crazyflie()
 		RefGen.stop_controller = True
 		logger.savelog()
-		logger.plot(REF_TYPE)
-	else:
-		print('No Crazyflies found, cannot run')
+		logger.plot(RefType, LogType)
