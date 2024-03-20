@@ -93,8 +93,8 @@ class CrazyflieGimbal2D:
 				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 200, 200, 6.3, SubGimbal2DType]
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_OFL.value:
-				self.gain_name = ['ofl_k1','ofl_k2','cmode']
-				self.gain_value = [-4800.0, -140.0, SubGimbal2DType]
+				self.gain_name = ['ofl_ld1','ofl_ld2','cmode']
+				self.gain_value = [-50.0, -30.0, SubGimbal2DType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
