@@ -1,3 +1,6 @@
+# System Overview
+![image](https://github.com/SFWen2/cf_gimbal_cmdr/assets/146141804/8e6ec170-a949-4229-b739-c9eab6a70ba2)
+
 # Installation Guide
 
 The purpose of this document is to establish an environment for communicating with Crazyflie quadcopters and reading data through Python scripts, for developing the firmware in CrazyFlie, please refer to: [crazyflie-firmware-LL](https://github.com/SFWen2/crazyflie-firmware-LL)
