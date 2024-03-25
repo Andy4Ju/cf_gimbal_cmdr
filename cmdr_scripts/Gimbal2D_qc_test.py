@@ -99,7 +99,7 @@ class CrazyflieGimbal2D:
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
 				self.data_c_name = 'sctrl_Gimbal2D.beta'
-				self.data_b_name = 'sctrl_Gimbal2D.ucmode'
+				self.data_b_name = 'sctrl_Gimbal2D.u_alpha'
 				self.data_d_name = 'sctrl_Gimbal2D.u_beta'
 
 			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
