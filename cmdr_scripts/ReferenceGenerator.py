@@ -41,7 +41,7 @@ class StepReferenceGenerator:
 					self.thrust = self.thrust_constant
 				elif current_time - self.controller_start_time < 6:
 					self.alpha = 0.0
-					self.beta = 0.0
+					self.beta = 0
 					self.thrust = self.thrust_constant
 				else:
 					self.alpha = 0; self.beta = 0; self.thrust = 0

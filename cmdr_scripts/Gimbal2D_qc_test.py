@@ -19,34 +19,30 @@ from parameter import URL, CONTROLLER_TYPE, REF_TYPE, LOG_TYPE, SUB_GIMBAL2D_TYP
 logging.basicConfig(level=logging.ERROR)
 
 '''Usage: Follow the steps before running this script'''
-'''=================================================='''
-'''=================================================='''
-'''=================================================='''
-'''Step 0: Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
+'''===================================================================================================='''
+'''Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
 
-'''Step 1: Set the URL of your crazyflie target, add a new URL in parameter.py '''
+'''Set the URL of your crazyflie target, add a new URL in parameter.py '''
 ControlTarget = URL.QC_GREY_ORANGE_URL.value
 
-'''Step 2: Assign Thrust Constant 0 ~ 0.6 N '''
+'''Assign Thrust Constant 0 ~ 0.6 N '''
 THRUST_CONST = 0.2
 
-'''Step 3: Assign the folder name of logged data, the default name is log_date'''
-DATA_FOLDER_NAME = 'log_'+time.strftime("%m%d")
-
-'''Step 4: Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
+'''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
 RefType = REF_TYPE.REF_TYPE_RAMP.value 
 
-'''Step 5: Assign the controller type, 5= singleppid, 7=gimbal2D.'''
+'''Assign the controller type, 5= singleppid, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_OFL.value
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
 
-'''Step 6: Assign the date log type, angular position / velocity or pwm command'''
+'''Assign the date log type, angular position / velocity or pwm command'''
 LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
 
-'''Step 7: Run the script'''
-'''=================================================='''
-'''=================================================='''
-'''=================================================='''
+'''Assign the folder name of logged data, the default name is log_date'''
+DATA_FOLDER_NAME = 'log_' + time.strftime("%m%d")
+
+'''Run the script'''
+'''===================================================================================================='''
 
 class CrazyflieGimbal2D:
 	def __init__(self, link_uri, index, controller_type, log_type):
@@ -90,16 +86,20 @@ class CrazyflieGimbal2D:
 			if SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value or SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_JALPHA.value:
 				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
 									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode']
-				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 200, 200, 6.3, SubGimbal2DType]
+				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 240, 240, 7.3, SubGimbal2DType]
 
-			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_OFL.value:
+			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_OFL.value:
 				self.gain_name = ['ofl_ld1','ofl_ld2','cmode']
-				self.gain_value = [-50.0, -30.0, SubGimbal2DType]
+				self.gain_value = [-60, -10, SubGimbal2DType]
+
+			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_NSF.value:
+				self.gain_name = ['nsf_K11','nsf_K12','nsf_K13','nsf_K14','nsf_K21','nsf_K22','nsf_K23','nsf_K24','cmode']
+				self.gain_value = [1000, 0.0, 109.5, 0.0, 0.0, 1000, 0.0, 109.5, SubGimbal2DType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
 				self.data_c_name = 'sctrl_Gimbal2D.beta'
-				self.data_b_name = 'sctrl_Gimbal2D.u_alpha'
+				self.data_b_name = 'sctrl_Gimbal2D.ucmode'
 				self.data_d_name = 'sctrl_Gimbal2D.u_beta'
 
 			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
@@ -231,7 +231,7 @@ if __name__ == '__main__':
 	if True:
 		le = CrazyflieGimbal2D(ControlTarget, 0, ControllerType, LogType)
 		time.sleep(0.25)
-		logger = ab_logger(CMD_RATE, folder_name=DATA_FOLDER_NAME)
+		logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, folder_name=DATA_FOLDER_NAME)
 		time.sleep(4)
 
 		cmd_rate = CMD_RATE # 200Hz

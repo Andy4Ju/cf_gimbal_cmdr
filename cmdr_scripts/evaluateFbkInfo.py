@@ -13,26 +13,34 @@ def getStepInfo(ref, fbk, Ts):
 	if Step_Value != 0:
 		Tr0_tick = 0
 		Trf_tick = 0
+		Tset_tick = 0
 		Ymax = 0
 		for y in range(t0_tick, tf_tick):
 			if abs(fbk[y]) > abs(0.1 * Step_Value) and abs(fbk[y-1]) <= abs(0.1 * Step_Value) and Tr0_tick == 0:
 				Tr0_tick = y
 			if abs(fbk[y]) > abs(0.9 * Step_Value) and abs(fbk[y-1]) <= abs(0.9 * Step_Value) and Trf_tick == 0:
 				Trf_tick = y
+			if all(abs(fbk[y:tf_tick] - Step_Value) < 0.075 * Step_Value) and Tset_tick == 0:
+				Tset_tick = y
 			if abs(fbk[y]) > Ymax:
 				Ymax = fbk[y]
 		if Tr0_tick != 0 and Trf_tick != 0:
 			Tr = (Trf_tick - Tr0_tick) * Ts
 		else:
 			Tr = -1
+		if Tset_tick != 0:
+			Tset = (Tset_tick - t0_tick) * Ts
+		else:
+			Tset = -1
 		Mp = (Ymax / Step_Value - 1) * 100
 	else:
 		Tr = 0
 		Mp = 0
+		Tset = 0
 
 	# print('Tr0_tick = %s, Trf_tick = %s'%(Tr0_tick, Trf_tick))
 	# print('Ymax = ',Ymax)
-	return [Tr, Mp]
+	return [Tr, Mp, Tset]
 
 def getTrackingInfo(ref, fbk):
 	error = ref - fbk
