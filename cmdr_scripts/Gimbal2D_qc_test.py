@@ -8,11 +8,12 @@ from threading import Thread
 from cflib.crazyflie.log import LogConfig
 from logger import ab_logger
 from ReferenceGenerator import *
-
+from parameter import *
 import math
 import cflib
 from cflib.crazyflie import Crazyflie
-from parameter import URL, CONTROLLER_TYPE, REF_TYPE, LOG_TYPE, SUB_GIMBAL2D_TYPE
+import PWM_Thrust_Test as pt
+
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -27,7 +28,7 @@ ControlTarget = URL.QC_ITRI_URL.value
 THRUST_CONST = 0.2
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_PWM_TEST.value 
+RefType = REF_TYPE.REF_TYPE_PWM.value 
 
 '''Assign the controller type, 5= singleppid, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
@@ -99,7 +100,8 @@ class CrazyflieGimbal2D:
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value:
 				self.gain_name = ['M1','M2','M3','M4','cmode']
-				self.gain_value = [5000,5000,5000,5000, SubGimbal2DType]
+				val = 6554 * 9
+				self.gain_value = [val,val,val,val, SubGimbal2DType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
@@ -227,58 +229,48 @@ class CrazyflieGimbal2D:
 if __name__ == '__main__':
 
 	# # Initialize the low-level drivers (don't list the debug drivers)
-	# cflib.crtp.init_drivers(enable_debug_driver=False)
-	# # Scan for Crazyflies and use the first one found
-	# print('Scanning interfaces for Crazyflies...')
-	# # available = cflib.crtp.scan_interfaces()
+	cflib.crtp.init_drivers(enable_debug_driver=False)
+	# Scan for Crazyflies and use the first one found
+	print('Scanning interfaces for Crazyflies...')
+	# available = cflib.crtp.scan_interfaces()
 
-	# le = CrazyflieGimbal2D(ControlTarget, 0, ControllerType, LogType)
-	# time.sleep(0.25)
-	# logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, LogType, folder_name=DATA_FOLDER_NAME)
-	# time.sleep(4)
+	le = CrazyflieGimbal2D(ControlTarget, 0, ControllerType, LogType)
+	time.sleep(0.25)
+	logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, LogType, folder_name=DATA_FOLDER_NAME)
+	time.sleep(4)
 
-		cmd_rate = CMD_RATE # 200Hz
-		t = 0
-		if RefType == REF_TYPE.REF_TYPE_STEP.value:
-			RefGen = StepReferenceGenerator(THRUST_CONST)
-			T_final = 6
-		elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
-			RefGen = TrajReferenceGenerator(THRUST_CONST)
-			T_final = 20
+	cmd_rate = CMD_RATE # 200Hz
+	t = 0
 
-		ctrl_thread = Thread(target=RefGen.run)
-		ctrl_thread.start()
-		start_time = time.time()
+	if RefType == REF_TYPE.REF_TYPE_STEP.value:
+		RefGen = StepReferenceGenerator(THRUST_CONST)
+		T_final = 6
+	elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
+		RefGen = TrajReferenceGenerator(THRUST_CONST)
+		T_final = 20
+	elif RefType == REF_TYPE.REF_TYPE_THRUST.value:
+		RefGen = ThrustReferenceGenerator(THRUST_CONST)
+		T_final = 10
+	elif RefType == REF_TYPE.REF_TYPE_PWM.value:
+		RefGen = ThrustReferenceGenerator(THRUST_CONST)
+		T_final = 4
 
-	# print("start_time = %s" % start_time)
+	ctrl_thread = Thread(target=RefGen.run)
+	ctrl_thread.start()
+	start_time = time.time()
+	print("start_time = %s" % start_time)
 
-		while t < T_final:
-			if ControllerType == CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value:
-				le.gain_name = ['M1','M2','M3','M4']
-				le.gain_value = [RefGen.M1, RefGen.M2, RefGen.M3, RefGen.M4]
-				for n in le.gain_name:
-					ind = le.gain_name.index(n)
-					le._cf.param.set_value(le.set_group.format(n), '{}'.format(le.gain_value[ind]))
+	while t < T_final:
+		le.alpha = RefGen.alpha
+		le.beta = RefGen.beta
+		le.thrust = RefGen.thrust
+		le._update_motors()
 
-			le.alpha = RefGen.alpha
-			le.beta = RefGen.beta
-			le.thrust = RefGen.thrust
-			le._update_motors()
+		t += cmd_rate
+		time.sleep(cmd_rate)
+		logger.log_append(le.timest, RefGen.alpha, RefGen.beta, le.data_a, le.data_b, le.data_c, le.data_d)
 
-	# 	t += cmd_rate
-	# 	time.sleep(cmd_rate)
-	# 	logger.log_append(le.timest, RefGen.alpha, RefGen.beta, le.data_a, le.data_b, le.data_c, le.data_d)
-
-	# le._stop_crazyflie()
-	# RefGen.stop_controller = True
-	# logger.savelog()
-	# logger.plot(RefType, LogType)
-  
-	##### Loading Data and Plot only: (For Paper Figures)
-	# '''
-	folder_name = './log_0325' # Specify Folder
-	logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, LogType, folder_name)
-	logger.log_memory = logger.openCSVMatrix(folder_name + '/log_0325_213700_73.txt')	# Specify File
-	print('Data Loaded... Now plotting:')
+	le._stop_crazyflie()
+	RefGen.stop_controller = True
+	logger.savelog()
 	logger.plot(RefType, LogType)
- 	# '''

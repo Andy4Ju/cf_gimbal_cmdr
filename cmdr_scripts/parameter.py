@@ -12,11 +12,8 @@ class CONTROLLER_TYPE(enum.Enum):
 class REF_TYPE(enum.Enum):
 	REF_TYPE_STEP = 1
 	REF_TYPE_RAMP = 2
-<<<<<<< Updated upstream
 	REF_TYPE_THRUST = 3
-=======
-	REF_TYPE_PWM_TEST = 10
->>>>>>> Stashed changes
+	REF_TYPE_PWM = 10
  
 class LOG_TYPE(enum.Enum):
     LOG_TYPE_ANGPOS_TRQ = 1

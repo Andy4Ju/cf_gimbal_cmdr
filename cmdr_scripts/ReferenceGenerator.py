@@ -26,7 +26,7 @@ class StepReferenceGenerator:
 				time.sleep(0.002)
     
 	def test_step(self, tnow):
-		print('tnow = ', tnow)
+		# print('tnow = ', tnow)
 		if tnow < 0:
 			self.alpha = 0
 			self.beta = 0
@@ -107,25 +107,12 @@ class TrajReferenceGenerator:
 		else:
 			self.alpha = 0; self.beta = 0; self.thrust = 0
    
-<<<<<<< Updated upstream
 class ThrustReferenceGenerator:
 	def __init__(self, thrust):
 		self.alpha = 0
 		self.beta = 0
 		self.thrust = 0 # 42598
 		self.thrust_constant = thrust
-=======
-class PWMTestReferenceGenerator:
-	def __init__(self):
-		self.M1 = 0
-		self.M2 = 0
-		self.M3 = 0
-		self.M4 = 0
-		self.alpha = 0
-		self.beta = 0
-		self.thrust = 0
-		self.thrust_constant = 0.1
->>>>>>> Stashed changes
 		self.controller_rate = 0.01
 
 		self.controller_start_time = time.time()
@@ -139,18 +126,13 @@ class PWMTestReferenceGenerator:
 			current_time = time.time()
 			if current_time - last_loop_time > self.controller_rate:
 				tnow = current_time - self.controller_start_time
-<<<<<<< Updated upstream
 				self.test_thrust(tnow)
-=======
-				self.pwm_test_ref(tnow)
->>>>>>> Stashed changes
 				last_loop_time = current_time
 			else:
 				time.sleep(0.002)
     
-<<<<<<< Updated upstream
 	def test_thrust(self, tnow):
-		print('tnow = ', tnow)
+		# print('tnow = ', tnow)
 		if tnow < 3:
 			self.alpha = 0
 			self.beta = 0
@@ -165,26 +147,3 @@ class PWMTestReferenceGenerator:
 			self.thrust = self.thrust_constant*(1-(tnow-6)/3)
 		else:
 			self.alpha = 0; self.beta = 0; self.thrust = 0
-=======
-	def pwm_test_ref(self, tnow):
-		if tnow < 3:
-			percent = 0.15
-		elif tnow < 6:
-			percent = 0.3
-		elif tnow < 9:
-			percent = 0.45
-		elif tnow < 12:
-			percent = 0.6
-		elif tnow < 15:
-			percent = 0.75
-		elif tnow < 18:
-			percent = 0.9
-		else:
-			percent = 0.95
-			
-		self.M1 = int(65535 * percent)
-		self.M2 = int(65535 * percent)
-		self.M3 = int(65535 * percent)
-		self.M4 = int(65535 * percent)
-		self.thrust = self.thrust_constant
->>>>>>> Stashed changes
