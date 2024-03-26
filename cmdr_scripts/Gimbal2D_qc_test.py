@@ -12,8 +12,6 @@ from parameter import *
 import math
 import cflib
 from cflib.crazyflie import Crazyflie
-import PWM_Thrust_Test as pt
-
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -100,7 +98,7 @@ class CrazyflieGimbal2D:
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value:
 				self.gain_name = ['M1','M2','M3','M4','cmode']
-				val = 6554 * 9
+				val = 53000
 				self.gain_value = [val,val,val,val, SubGimbal2DType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
