@@ -1,6 +1,6 @@
 import numpy as np
 
-def getStepInfo(ref, fbk, Ts):
+def getStepInfo(ref, fbk, Ts): # Ts is Command Time
 	l = len(ref)
 	Step_Value = 0
 	for x in range(2, l):
@@ -45,3 +45,24 @@ def getStepInfo(ref, fbk, Ts):
 def getTrackingInfo(ref, fbk):
 	error = ref - fbk
 	return np.std(error)
+
+def getRMSInfo(ref, fbk, Ts): # Ts is Sampling Time
+	l = len(ref)
+	Signal_flag = 0 # Verify that Signal comes in
+	for x in range(1, l):
+		if ref[x] != 0 and ref[x-1] == 0:
+			t0_tick = x
+		if ref[x] == 0 and ref[x-1] != 0:
+			tf_tick = x
+			Signal_flag = 1
+   
+	if Signal_flag: # Calculate RMSE only for Tracking Period
+		data_ref = ref[t0_tick:tf_tick]
+		data_fbk = fbk[t0_tick:tf_tick]
+		squared_errors = (data_ref - data_fbk) ** 2
+		rmse = np.sqrt(np.mean(squared_errors))
+	else:
+		rmse = -1
+		print('No Signal Detected?')
+	
+	return rmse
