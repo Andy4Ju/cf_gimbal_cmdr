@@ -21,20 +21,20 @@ logging.basicConfig(level=logging.ERROR)
 '''Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
 
 '''Set the URL of your crazyflie target, add a new URL in parameter.py '''
-ControlTarget = URL.QC_GREY_BROWN_URL.value
+ControlTarget = URL.QC_ITRI_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
 THRUST_CONST = 0.2
 
-'''Assign the reference type, 1 = step, 2 = ramp, 3 = thrust. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_RAMP.value 
+'''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
+RefType = REF_TYPE.REF_TYPE_PWM_TEST.value 
 
 '''Assign the controller type, 5= singleppid, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_NSF.value
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
-LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
+LogType = LOG_TYPE.LOG_TYPE_PWM_CMD.value
 
 '''Assign the folder name of logged data, the default name is log_date'''
 DATA_FOLDER_NAME = 'log_' + time.strftime("%m%d")
@@ -96,6 +96,10 @@ class CrazyflieGimbal2D:
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_NSF.value:
 				self.gain_name = ['nsf_K11','nsf_K12','nsf_K13','nsf_K14','nsf_K21','nsf_K22','nsf_K23','nsf_K24','cmode']
 				self.gain_value = [1000, 0.0, 109.5, 0.0, 0.0, 1000, 0.0, 109.5, SubGimbal2DType]
+
+			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value:
+				self.gain_name = ['M1','M2','M3','M4','cmode']
+				self.gain_value = [5000,5000,5000,5000, SubGimbal2DType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
@@ -233,29 +237,33 @@ if __name__ == '__main__':
 	# logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, LogType, folder_name=DATA_FOLDER_NAME)
 	# time.sleep(4)
 
-	# cmd_rate = CMD_RATE # 200Hz
-	# t = 0
-	# if RefType == REF_TYPE.REF_TYPE_STEP.value:
-	# 	RefGen = StepReferenceGenerator(THRUST_CONST)
-	# 	T_final = 7
-	# elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
-	# 	RefGen = TrajReferenceGenerator(THRUST_CONST)
-	# 	T_final = 19
-	# elif RefType == REF_TYPE.REF_TYPE_THRUST.value:
-	# 	RefGen = ThrustReferenceGenerator(THRUST_CONST)
-	# 	T_final = 10
+		cmd_rate = CMD_RATE # 200Hz
+		t = 0
+		if RefType == REF_TYPE.REF_TYPE_STEP.value:
+			RefGen = StepReferenceGenerator(THRUST_CONST)
+			T_final = 6
+		elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
+			RefGen = TrajReferenceGenerator(THRUST_CONST)
+			T_final = 20
 
-	# ctrl_thread = Thread(target=RefGen.run)
-	# ctrl_thread.start()
-	# start_time = time.time()
+		ctrl_thread = Thread(target=RefGen.run)
+		ctrl_thread.start()
+		start_time = time.time()
 
 	# print("start_time = %s" % start_time)
 
-	# while t < T_final:
-	# 	le.alpha = RefGen.alpha
-	# 	le.beta = RefGen.beta
-	# 	le.thrust = RefGen.thrust
-	# 	le._update_motors()
+		while t < T_final:
+			if ControllerType == CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value:
+				le.gain_name = ['M1','M2','M3','M4']
+				le.gain_value = [RefGen.M1, RefGen.M2, RefGen.M3, RefGen.M4]
+				for n in le.gain_name:
+					ind = le.gain_name.index(n)
+					le._cf.param.set_value(le.set_group.format(n), '{}'.format(le.gain_value[ind]))
+
+			le.alpha = RefGen.alpha
+			le.beta = RefGen.beta
+			le.thrust = RefGen.thrust
+			le._update_motors()
 
 	# 	t += cmd_rate
 	# 	time.sleep(cmd_rate)
