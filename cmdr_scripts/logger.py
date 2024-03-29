@@ -78,20 +78,7 @@ class ab_logger:
 		dd = log_memory_array[:, 6]
 
 		if LogType == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
-			if RefType == REF_TYPE.REF_TYPE_STEP.value:
-				plt.subplot(221)
-				plt.plot(timestamp, ad, 'r--', timestamp, da, 'k')
-				plt.ylabel('angle (rad)')
-				plt.title('alpha')
-				plt.legend(['alpha_ref','alpha_fb'])
-				plt.grid(True)
-				plt.subplot(222)
-				plt.plot(timestamp, bd, 'b--', timestamp, dc, 'k')
-				plt.ylabel('angle (rad)')
-				plt.title('beta')
-				plt.legend(['beta_ref','beta_fb'])
-				plt.grid(True)
-			elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
+			if RefType == REF_TYPE.REF_TYPE_RAMP.value:
 				alpha_error = ad - da
 				beta_error = bd - dc
 				plt.subplot(221)
@@ -106,6 +93,19 @@ class ab_logger:
 				plt.ylabel('angle (rad)')
 				plt.title('beta')
 				plt.legend(['beta_ref','beta_fb','error'])
+				plt.grid(True)
+			else:
+				plt.subplot(221)
+				plt.plot(timestamp, ad, 'r--', timestamp, da, 'k')
+				plt.ylabel('angle (rad)')
+				plt.title('alpha')
+				plt.legend(['alpha_ref','alpha_fb'])
+				plt.grid(True)
+				plt.subplot(222)
+				plt.plot(timestamp, bd, 'b--', timestamp, dc, 'k')
+				plt.ylabel('angle (rad)')
+				plt.title('beta')
+				plt.legend(['beta_ref','beta_fb'])
 				plt.grid(True)
 			plt.subplot(223)
 			plt.plot(timestamp, db, 'r')
