@@ -79,7 +79,7 @@ class TrajReferenceGenerator:
 				time.sleep(0.002)
 	
 	def test_betalpha(self, tnow):
-		print('tnow = ', tnow)
+		# print('tnow = ', tnow)
 		if tnow < 3:
 			self.alpha = 0
 			self.beta = 0
