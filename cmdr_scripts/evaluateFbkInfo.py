@@ -20,7 +20,7 @@ def getStepInfo(ref, fbk, Ts): # Ts is Command Time
 				Tr0_tick = y
 			if abs(fbk[y]) > abs(0.9 * Step_Value) and abs(fbk[y-1]) <= abs(0.9 * Step_Value) and Trf_tick == 0:
 				Trf_tick = y
-			if all(abs(fbk[y:tf_tick] - Step_Value) < 0.075 * Step_Value) and Tset_tick == 0:
+			if all(abs(fbk[y:tf_tick] - Step_Value) < 0.025 * Step_Value) and Tset_tick == 0:
 				Tset_tick = y
 			if abs(fbk[y]) > Ymax:
 				Ymax = fbk[y]
