@@ -20,20 +20,20 @@ logging.basicConfig(level=logging.ERROR)
 '''Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
 
 '''Set the URL of your crazyflie target, add a new URL in parameter.py '''
-ControlTarget = URL.QC_GREY_ORANGE_URL.value
+ControlTarget = URL.QC_ITRI_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
 THRUST_CONST = 0.2
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_RAMP.value 
+RefType = REF_TYPE.REF_TYPE_PWM.value 
 
 '''Assign the controller type, 5= singleppid, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
-LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
+LogType = LOG_TYPE.LOG_TYPE_PWM_CMD.value
 
 '''Assign the folder name of logged data, the default name is log_date'''
 DATA_FOLDER_NAME = 'log_' + time.strftime("%m%d")
@@ -98,8 +98,8 @@ class CrazyflieGimbal2D:
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value:
 				self.gain_name = ['M1','M2','M3','M4','cmode']
-				val = 53000
-				self.gain_value = [val,val,val,val, SubGimbal2DType]
+				val = 65000
+				self.gain_value = [val, val, val, val, SubGimbal2DType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
@@ -108,7 +108,7 @@ class CrazyflieGimbal2D:
 				self.data_d_name = 'sctrl_Gimbal2D.u_beta'
 
 			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
-				self.data_a_name = 'sctrl_Gimbal2D.t_m1'
+				self.data_a_name = 'pm.vbat'
 				self.data_b_name = 'sctrl_Gimbal2D.t_m2'
 				self.data_c_name = 'sctrl_Gimbal2D.t_m3'
 				self.data_d_name = 'sctrl_Gimbal2D.t_m4'

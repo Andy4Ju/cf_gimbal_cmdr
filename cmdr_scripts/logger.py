@@ -133,6 +133,7 @@ class ab_logger:
 			plt.plot(timestamp, dd, 'm')
 			plt.ylabel('m4 (N)')
 			plt.grid(True)
+			print('last vbat = ', da[-1])
 
 		if RefType == REF_TYPE.REF_TYPE_STEP.value:
 			[Alpha_Tr, Alpha_Mp, ATset] = eva.getStepInfo(ad, da, self.Ts)
@@ -148,5 +149,5 @@ class ab_logger:
 			Alpha_error_rmse =  eva.getRMSInfo(ad, da, self.Ts)
 			Beta_error_rmse =  eva.getRMSInfo(bd, dc, self.Ts)
 			print('Alpha_error_rmse = %s, Beta_error_rmse = %s' %(Alpha_error_rmse, Beta_error_rmse))
-
+   
 		plt.show()
