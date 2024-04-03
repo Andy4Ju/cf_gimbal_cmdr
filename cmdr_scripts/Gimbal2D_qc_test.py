@@ -23,17 +23,18 @@ logging.basicConfig(level=logging.ERROR)
 ControlTarget = URL.QC_ITRI_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
-THRUST_CONST = 0.2
+THRUST_CONST = 0.20
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_PWM.value 
+RefType = REF_TYPE.REF_TYPE_THRUST.value 
 
 '''Assign the controller type, 5= singleppid, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
+MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
-LogType = LOG_TYPE.LOG_TYPE_PWM_CMD.value
+LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
 
 '''Assign the folder name of logged data, the default name is log_date'''
 DATA_FOLDER_NAME = 'log_' + time.strftime("%m%d")
@@ -85,21 +86,21 @@ class CrazyflieGimbal2D:
 
 			if SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value or SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_JALPHA.value:
 				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
-									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode']
-				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 240, 240, 7.3, SubGimbal2DType]
+									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode', 'mtype']
+				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 200, 200, 5.5, 240, 240, 7.3, SubGimbal2DType, MotorType]
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_OFL.value:
-				self.gain_name = ['ofl_ld1','ofl_ld2','cmode']
-				self.gain_value = [-60, -10, SubGimbal2DType]
+				self.gain_name = ['ofl_ld1','ofl_ld2','cmode', 'mtype']
+				self.gain_value = [-60, -10, SubGimbal2DType,MotorType]
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_NSF.value:
-				self.gain_name = ['nsf_K11','nsf_K12','nsf_K13','nsf_K14','nsf_K21','nsf_K22','nsf_K23','nsf_K24','cmode']
-				self.gain_value = [1000, 0.0, 109.5, 0.0, 0.0, 1000, 0.0, 109.5, SubGimbal2DType]
+				self.gain_name = ['nsf_K11','nsf_K12','nsf_K13','nsf_K14','nsf_K21','nsf_K22','nsf_K23','nsf_K24','cmode', 'mtype']
+				self.gain_value = [1000, 0.0, 109.5, 0.0, 0.0, 1000, 0.0, 109.5, SubGimbal2DType,MotorType]
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PWMTEST.value:
-				self.gain_name = ['M1','M2','M3','M4','cmode']
+				self.gain_name = ['M1','M2','M3','M4','cmode', 'mtype']
 				val = 65000
-				self.gain_value = [val, val, val, val, SubGimbal2DType]
+				self.gain_value = [val, val, val, val, SubGimbal2DType,MotorType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
