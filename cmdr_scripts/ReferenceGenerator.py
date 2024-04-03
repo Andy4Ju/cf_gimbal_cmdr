@@ -144,6 +144,7 @@ class ThrustReferenceGenerator:
 		elif tnow < 9:
 			self.alpha = 0
 			self.beta = 0
-			self.thrust = self.thrust_constant*(1-(tnow-6)/3)
+			# self.thrust = self.thrust_constant*(1-(tnow-6)/3)
+			self.thrust = self.thrust_constant
 		else:
 			self.alpha = 0; self.beta = 0; self.thrust = 0

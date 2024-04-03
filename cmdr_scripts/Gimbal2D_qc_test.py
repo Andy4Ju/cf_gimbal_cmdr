@@ -23,14 +23,14 @@ logging.basicConfig(level=logging.ERROR)
 ControlTarget = URL.QC_ITRI_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
-THRUST_CONST = 0.20
+THRUST_CONST = 0.75
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
 RefType = REF_TYPE.REF_TYPE_THRUST.value 
 
 '''Assign the controller type, 5= singleppid, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_THRUST.value
 MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
@@ -101,6 +101,10 @@ class CrazyflieGimbal2D:
 				self.gain_name = ['M1','M2','M3','M4','cmode', 'mtype']
 				val = 65000
 				self.gain_value = [val, val, val, val, SubGimbal2DType,MotorType]
+    
+			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_THRUST.value:
+				self.gain_name = ['cmode', 'mtype']
+				self.gain_value = [SubGimbal2DType, MotorType]
 
 			if log_type == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 				self.data_a_name = 'sctrl_Gimbal2D.alpha'
