@@ -12,6 +12,7 @@ from parameter import *
 import math
 import cflib
 from cflib.crazyflie import Crazyflie
+import utils
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -63,6 +64,7 @@ class CrazyflieGimbal2D:
 		self.alpha = 0
 		self.beta = 0
 		self.thrust = 0
+		self.CompQuat = 0
 		self.index = index
 		self.base_q = np.array([1,0,0,0])
 		self.group_name = ''
@@ -241,11 +243,22 @@ class CrazyflieGimbal2D:
 		print('Disconnected from %s' % link_uri)
 
 	def _update_motors(self):
-		self._cf.commander.send_twod(self.index, self.base_q[0], self.base_q[1], self.base_q[2], self.base_q[3], self.alpha, self.beta, self.thrust)
+		if ControllerType == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
+			self._cf.commander.send_omni(self.CompQuat, 0, 0, 0, self.thrust)
+		else:
+			self._cf.commander.send_twod(self.index, self.base_q[0], self.base_q[1], self.base_q[2], self.base_q[3], self.alpha, self.beta, self.thrust)
 
 	def _stop_crazyflie(self):
 		self._cf.commander.send_stop_setpoint()
 		self._cf.close_link()
+
+
+def getOmniRef(alpha, beta):
+	R_Bi_i_d = np.array([[np.cos(beta), 0, np.sin(beta)],
+							[np.sin(alpha)*np.sin(beta), np.cos(alpha), -np.sin(alpha)*np.cos(beta)], 
+							[-np.cos(alpha)*np.sin(beta), np.sin(alpha), np.cos(alpha)*np.cos(beta)]])
+	quat_r = utils.rot2quat3(R_Bi_i_d)
+	return utils.quatCompress(quat_r)
 
 if __name__ == '__main__':
 
@@ -285,6 +298,8 @@ if __name__ == '__main__':
 		le.alpha = RefGen.alpha
 		le.beta = RefGen.beta
 		le.thrust = RefGen.thrust
+		if ControllerType == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
+			le.CompQuat = getOmniRef(le.alpha, le.beta)
 		le._update_motors()
 
 		t += cmd_rate
