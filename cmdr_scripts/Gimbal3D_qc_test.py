@@ -34,7 +34,7 @@ SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
 MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
-LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
+LogType = LOG_TYPE.LOG_TYPE_QUAT.value
 
 '''Assign the folder name of logged data, the default name is log_date'''
 DATA_FOLDER_NAME = 'log_' + time.strftime("%m%d")
@@ -117,12 +117,25 @@ class CrazyflieGimbal2D:
 				self.data_b_name = 'sctrl_Gimbal2D.t_m2'
 				self.data_c_name = 'sctrl_Gimbal2D.t_m3'
 				self.data_d_name = 'sctrl_Gimbal2D.t_m4'
+
 		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
 			self.group_name = 'sparam_omni'
 			self.config_name ='sctrl_omni'
 			self.set_group = 'sparam_omni.{}'
 			self.gain_name = ['Kwx',  'Kix', 'Kdx','Kwy', 'Kiy', 'Kdy','KRx', 'KRix', 'KRy','KRiy','Kffx','Kffy']
-    
+			self.gain_value = [600, 1200, 15, 600, 1300, 3, 10, 6, 6.7, 6.2, 0.6, 0.6]
+			if log_type == LOG_TYPE.LOG_TYPE_QUAT.value:
+				self.data_a_name = 'sctrl_omni.qw_IMU'
+				self.data_c_name = 'sctrl_omni.qx_IMU'
+				self.data_b_name = 'sctrl_omni.qy_IMU'
+				self.data_d_name = 'sctrl_omni.qz_IMU'
+
+			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
+				self.data_a_name = 'sctrl_omni.t_m1'
+				self.data_b_name = 'sctrl_omni.t_m2'
+				self.data_c_name = 'sctrl_omni.t_m3'
+				self.data_d_name = 'sctrl_omni.t_m4'
+
 		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_SINGLEPPID.value:
 			self.group_name = 'sparam_ppid'
 			self.config_name ='sctrl_ppid'

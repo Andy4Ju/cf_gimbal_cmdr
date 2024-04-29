@@ -23,6 +23,7 @@ class REF_TYPE(enum.Enum):
 class LOG_TYPE(enum.Enum):
     LOG_TYPE_ANGPOS_TRQ = 1
     LOG_TYPE_PWM_CMD = 2
+    LOG_TYPE_QUAT = 3
     
 class SUB_GIMBAL2D_TYPE(enum.Enum):
 	SUB_GIMBAL2D_TYPE_PID = 0

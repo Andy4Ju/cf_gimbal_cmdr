@@ -20,6 +20,8 @@ class ab_logger:
 			self.log_memory = [["timestamp", "alpha_d", "beta_d", "alpha_m", "beta_m", "u_alpha", "u_beta"]]
 		elif self.LogType == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
 			self.log_memory = [["timestamp", "alpha_d", "beta_d", "cmd_m1", "cmd_m2", "cmd_m3", "cmd_m4"]]
+		elif self.LogType == LOG_TYPE.LOG_TYPE_QUAT.value:
+			self.log_memory = [["timestamp", "alpha_d", "beta_d", "qw_IMU", "qx_IMU", "qy_IMU", "qz_IMU"]]
 
 	def log_append(self, timestamp, ad, bd, da, db, dc, dd):
 		"""
@@ -65,6 +67,14 @@ class ab_logger:
     
 		rows_drop = list(filter(None, rows))
 		return rows_drop
+
+	def _rpy_XYZ(self, quat0, quat1, quat2, quat3):
+		rpy = np.array([0.0,0.0,0.0])
+		roll = np.arctan2(-2*(quat2*quat3-quat0*quat1), 1-2*(quat1**2+quat3**2))
+		pitch = np.arctan2(-2*(quat1*quat3-quat0*quat2), 1-2*(quat2**2+quat3**2))
+		yaw = np.arcsin(2*(quat1*quat2+quat0*quat3))
+		rpy = [roll,pitch,yaw]
+		return rpy
 
 	def plot(self, RefType, LogType):
 		n = len(self.log_memory)
@@ -134,6 +144,28 @@ class ab_logger:
 			plt.ylabel('m4 (N)')
 			plt.grid(True)
 			print('last vbat = ', da[-1])
+
+		elif LogType == LOG_TYPE.LOG_TYPE_QUAT.value:
+			rpy = self._rpy_XYZ(da, db, dc, dd)
+
+			plt.subplot(311)
+			plt.plot(timestamp, rpy[0], 'r')
+			plt.ylabel('angle (rad)')
+			plt.title('Roll')
+			plt.grid(True)
+
+			plt.subplot(312)
+			plt.plot(timestamp, rpy[1], 'r')
+			plt.ylabel('angle (rad)')
+			plt.title('Pitch')
+			plt.grid(True)
+
+			plt.subplot(313)
+			plt.plot(timestamp, rpy[2], 'r')
+			plt.ylabel('angle (rad)')
+			plt.title('Yaw')
+			plt.grid(True)
+
 
 		if RefType == REF_TYPE.REF_TYPE_STEP.value:
 			[Alpha_Tr, Alpha_Mp, ATset] = eva.getStepInfo(ad, da, self.Ts)
