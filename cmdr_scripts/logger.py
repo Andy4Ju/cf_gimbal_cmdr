@@ -149,13 +149,13 @@ class ab_logger:
 			rpy = self._rpy_XYZ(da, db, dc, dd)
 
 			plt.subplot(311)
-			plt.plot(timestamp, rpy[0], 'r')
+			plt.plot(timestamp, rpy[1], 'r')
 			plt.ylabel('angle (rad)')
 			plt.title('Roll')
 			plt.grid(True)
 
 			plt.subplot(312)
-			plt.plot(timestamp, rpy[1], 'r')
+			plt.plot(timestamp, rpy[0], 'r')
 			plt.ylabel('angle (rad)')
 			plt.title('Pitch')
 			plt.grid(True)

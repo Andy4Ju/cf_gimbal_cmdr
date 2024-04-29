@@ -27,7 +27,7 @@ ControlTarget = URL.QC_ITRI_URL.value
 THRUST_CONST = 0.3
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_RAMP.value 
+RefType = REF_TYPE.REF_TYPE_THRUST.value 
 
 '''Assign the controller type, 5= singleppid, 6 = omni, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value # 5= singleppid, 7=gimbal2D
@@ -124,8 +124,20 @@ class CrazyflieGimbal2D:
 			self.group_name = 'sparam_omni'
 			self.config_name ='sctrl_omni'
 			self.set_group = 'sparam_omni.{}'
-			self.gain_name = ['Kwx',  'Kix', 'Kdx','Kwy', 'Kiy', 'Kdy','KRx', 'KRix', 'KRy','KRiy','Kffx','Kffy']
-			self.gain_value = [600, 1200, 15, 600, 1300, 3, 10, 6, 6.7, 6.2, 0.6, 0.6]
+			self.gain_name = ['Kwx', 'Kix', 'Kdx', 
+                     'Kwy', 'Kiy', 'Kdy', 
+                     'Kwz', 'Kiz', 'Kdz',
+                     'KRx', 'KRix', 
+                     'KRy', 'KRiy', 
+                     'KRz', 'KRiz',
+                     'Kffx', 'Kffy']
+			self.gain_value = [600, 1000, 9, 
+                      600, 1200, 10, 
+                      300, 450, 2, 
+                      8, 3, 
+                      6.7, 6.2, 
+                      7.8, 10, 
+                      0.6, 0.6]
 			if log_type == LOG_TYPE.LOG_TYPE_QUAT.value:
 				self.data_a_name = 'sctrl_omni.qw_IMU'
 				self.data_c_name = 'sctrl_omni.qx_IMU'
