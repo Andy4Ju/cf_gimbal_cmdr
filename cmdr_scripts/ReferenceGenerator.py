@@ -36,7 +36,7 @@ class StepReferenceGenerator:
 			self.beta = 0
 			self.thrust = self.thrust_constant
 		elif tnow < 2:
-			self.alpha = 0.4
+			self.alpha = 0.0
 			self.beta = 0
 			self.thrust = self.thrust_constant	
 		elif tnow < 4:

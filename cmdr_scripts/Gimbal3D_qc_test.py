@@ -23,13 +23,13 @@ logging.basicConfig(level=logging.ERROR)
 ControlTarget = URL.QC_ITRI_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
-THRUST_CONST = 0.4
+THRUST_CONST = 0.3
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_STEP.value 
+RefType = REF_TYPE.REF_TYPE_RAMP.value 
 
 '''Assign the controller type, 5= singleppid, 6 = omni, 7=gimbal2D.'''
-ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
+ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value # 5= singleppid, 7=gimbal2D
 SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
 MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
 
@@ -113,11 +113,16 @@ class CrazyflieGimbal2D:
 				self.data_d_name = 'sctrl_Gimbal2D.u_beta'
 
 			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
-				self.data_a_name = 'pm.vbat'
+				self.data_a_name = 'sctrl_Gimbal2D.t_m1'
 				self.data_b_name = 'sctrl_Gimbal2D.t_m2'
 				self.data_c_name = 'sctrl_Gimbal2D.t_m3'
 				self.data_d_name = 'sctrl_Gimbal2D.t_m4'
-
+		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
+			self.group_name = 'sparam_omni'
+			self.config_name ='sctrl_omni'
+			self.set_group = 'sparam_omni.{}'
+			self.gain_name = ['Kwx',  'Kix', 'Kdx','Kwy', 'Kiy', 'Kdy','KRx', 'KRix', 'KRy','KRiy','Kffx','Kffy']
+    
 		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_SINGLEPPID.value:
 			self.group_name = 'sparam_ppid'
 			self.config_name ='sctrl_ppid'
