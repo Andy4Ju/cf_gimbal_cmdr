@@ -57,6 +57,21 @@ def rpycalc(quaternion):
                      (1 - 2 * (quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2])))
     return np.array([phi, theta, psi])
 
+def rpycalc_ZYX(quaternion):
+    phi = np.arctan2(2 * (quaternion[0] * quaternion[1] + quaternion[2] * quaternion[3]),
+                     (1 - 2 * (quaternion[2] * quaternion[2] + quaternion[1] * quaternion[1])))
+    theta = np.arcsin(2 * (quaternion[0] * quaternion[2] - quaternion[3] * quaternion[1]))
+    psi = np.arctan2(2 * (quaternion[0] * quaternion[3] + quaternion[2] * quaternion[1]),
+                     (1 - 2 * (quaternion[1] * quaternion[1] + quaternion[2] * quaternion[2])))
+    return np.array([phi, theta, psi])
+
+def rpy_YZX(quat0, quat1, quat2, quat3):
+    rpy = np.array([0.0,0.0,0.0])
+    roll = np.arctan2(-2*(quat2*quat3-quat0*quat1), 1-2*(quat1**2+quat3**2))
+    pitch = np.arctan2(-2*(quat1*quat3-quat0*quat2), 1-2*(quat2**2+quat3**2))
+    yaw = np.arcsin(2*(quat1*quat2+quat0*quat3))
+    rpy = [roll,pitch,yaw]
+    return rpy
 
 def quat2rot(q):
     q0 = q[3]

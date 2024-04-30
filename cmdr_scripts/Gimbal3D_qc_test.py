@@ -131,11 +131,11 @@ class CrazyflieGimbal2D:
                      'KRy', 'KRiy', 
                      'KRz', 'KRiz',
                      'Kffx', 'Kffy']
-			self.gain_value = [500, 800, 6, 
-                      600, 1000, 10, 
+			self.gain_value = [600, 1200, 15, 
+                      800, 1500, 10, 
                       350, 600, 3.5, 
-                      6, 3, 
-                      6.7, 6.2, 
+                      6, 0.3, 
+                      6.7, 0.1, 
                       5, 7, 
                       0.6, 0.6]
 			if log_type == LOG_TYPE.LOG_TYPE_QUAT.value:
@@ -239,6 +239,7 @@ class CrazyflieGimbal2D:
 		self.data_b = (data[self.data_b_name], 0)[math.isnan(data[self.data_b_name]) == True]
 		self.data_c = (data[self.data_c_name], 0)[math.isnan(data[self.data_c_name]) == True]
 		self.data_d = (data[self.data_d_name], 0)[math.isnan(data[self.data_d_name]) == True]
+		# print('quat=%s,%s,%s,%s'%(self.data_a,self.data_b,self.data_c,self.data_d))
 
 	def _connection_failed(self, link_uri, msg):
 		"""Callback when connection initial connection fails (i.e no Crazyflie
@@ -272,10 +273,14 @@ def getOmniRef(th1, th2, th3):
 	s1 = np.sin(th1)
 	s2 = np.sin(th2)
 	s3 = np.sin(th3)
-	R_XYZ = np.array([[c2*c3, -s2, c2*s3],
-							[c1*s3+c3*s1*s2,c1*c3-s1*s2*s3,-c2*s1], 
-							[s1*s3-c1*c3*s2,c3*s1+c1*s2*s3,c1*c2]])
-	quat_r = utils.rot2quat3(R_XYZ)
+	# R_XYZ = np.array([[c2*c3, -s2, c2*s3],
+	# 						[c1*s3+c3*s1*s2,c1*c3-s1*s2*s3,-c2*s1], 
+	# 						[s1*s3-c1*c3*s2,c3*s1+c1*s2*s3,c1*c2]])
+	R_ZYX = np.array([[c2*c3, s1*s2*c3-c1*s3, c1*s2*c3+s1*s3],
+							[c2*s3,s1*s2*s3+c1*c3,c1*s2*s3-s1*c3], 
+							[-s2,s1*c2,c1*c2]])
+	quat_r = utils.rot2quat3(R_ZYX)
+	# print('quat_r=%s'%quat_r)
 	return utils.quatCompress(quat_r)
 
 if __name__ == '__main__':

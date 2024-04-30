@@ -5,6 +5,7 @@ import time
 import numpy as np
 import evaluateFbkInfo as eva
 from parameter import REF_TYPE, LOG_TYPE
+import utils
 
 class ab_logger:
 	"""
@@ -68,13 +69,13 @@ class ab_logger:
 		rows_drop = list(filter(None, rows))
 		return rows_drop
 
-	def _rpy_XYZ(self, quat0, quat1, quat2, quat3):
-		rpy = np.array([0.0,0.0,0.0])
-		roll = np.arctan2(-2*(quat2*quat3-quat0*quat1), 1-2*(quat1**2+quat3**2))
-		pitch = np.arctan2(-2*(quat1*quat3-quat0*quat2), 1-2*(quat2**2+quat3**2))
-		yaw = np.arcsin(2*(quat1*quat2+quat0*quat3))
-		rpy = [roll,pitch,yaw]
-		return rpy
+	# def _rpy_XYZ(self, quat0, quat1, quat2, quat3):
+	# 	rpy = np.array([0.0,0.0,0.0])
+	# 	roll = np.arctan2(-2*(quat2*quat3-quat0*quat1), 1-2*(quat1**2+quat3**2))
+	# 	pitch = np.arctan2(-2*(quat1*quat3-quat0*quat2), 1-2*(quat2**2+quat3**2))
+	# 	yaw = np.arcsin(2*(quat1*quat2+quat0*quat3))
+	# 	rpy = [roll,pitch,yaw]
+	# 	return rpy
 
 	def plot(self, RefType, LogType):
 		n = len(self.log_memory)
@@ -146,23 +147,31 @@ class ab_logger:
 			print('last vbat = ', da[-1])
 
 		elif LogType == LOG_TYPE.LOG_TYPE_QUAT.value:
-			rpy = self._rpy_XYZ(da, db, dc, dd)
+			# rpy = self._rpy_XYZ(da, db, dc, dd)
+			# quat = np.array([da, db, dc, dd])
+			rpy = utils.rpy_YZX(da, db, dc, dd)
 
 			plt.subplot(311)
-			plt.plot(timestamp, rpy[0], 'r')
+			plt.plot(timestamp,ad,'b--', timestamp,rpy[1], 'r')
 			plt.ylabel('angle (rad)')
 			plt.title('Roll')
+			plt.xlim([0, 10])
+			plt.ylim([-1, 1])
 			plt.grid(True)
 
 			plt.subplot(312)
-			plt.plot(timestamp, rpy[1], 'r')
+			plt.plot(timestamp,bd,'b--', timestamp, rpy[0], 'r')
 			plt.ylabel('angle (rad)')
 			plt.title('Pitch')
+			plt.xlim([0, 10])
+			plt.ylim([-1, 1])
 			plt.grid(True)
 
 			plt.subplot(313)
 			plt.plot(timestamp, rpy[2], 'r')
 			plt.ylabel('angle (rad)')
+			plt.xlim([0, 10])
+			plt.ylim([-1, 1])
 			plt.title('Yaw')
 			plt.grid(True)
 
