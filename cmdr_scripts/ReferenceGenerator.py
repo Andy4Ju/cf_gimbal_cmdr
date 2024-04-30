@@ -148,3 +148,48 @@ class ThrustReferenceGenerator:
 			self.thrust = self.thrust_constant
 		else:
 			self.alpha = 0; self.beta = 0; self.thrust = 0
+
+class G3DReferenceGenerator:
+	def __init__(self, thrust):
+		self.roll = 0
+		self.pitch = 0
+		self.yaw = 0
+		self.thrust = 0 # 42598
+		self.thrust_constant = thrust
+		self.controller_rate = 0.01
+
+		self.controller_start_time = time.time()
+		self.stop_controller = False
+
+		print("controller_start_time = %s" % self.controller_start_time)
+
+	def run(self):
+		last_loop_time = time.time()
+		while not self.stop_controller:
+			current_time = time.time()
+			if current_time - last_loop_time > self.controller_rate:
+				tnow = current_time - self.controller_start_time
+				self.test_G3D(tnow)
+				last_loop_time = current_time
+			else:
+				time.sleep(0.002)
+    
+	def test_G3D(self, tnow):
+		# print('tnow = ', tnow)
+		if tnow < 3:
+			self.roll = 0
+			self.pitch = 0
+			self.yaw = 0
+			self.thrust = self.thrust_constant*tnow/3
+		elif tnow < 6:
+			self.roll = 0.1
+			self.pitch = 0
+			self.yaw = 0
+			self.thrust = self.thrust_constant
+		elif tnow < 9:
+			self.roll = 0
+			self.pitch = 0
+			self.yaw = 0
+			self.thrust = self.thrust_constant
+		else:
+			self.roll = 0; self.pitch = 0; self.yaw = 0; self.thrust = 0

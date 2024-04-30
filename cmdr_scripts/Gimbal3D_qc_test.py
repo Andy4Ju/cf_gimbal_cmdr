@@ -131,12 +131,12 @@ class CrazyflieGimbal2D:
                      'KRy', 'KRiy', 
                      'KRz', 'KRiz',
                      'Kffx', 'Kffy']
-			self.gain_value = [600, 1000, 9, 
-                      600, 1200, 10, 
-                      300, 450, 2, 
-                      8, 3, 
+			self.gain_value = [500, 800, 6, 
+                      600, 1000, 10, 
+                      350, 600, 3.5, 
+                      6, 3, 
                       6.7, 6.2, 
-                      7.8, 10, 
+                      5, 7, 
                       0.6, 0.6]
 			if log_type == LOG_TYPE.LOG_TYPE_QUAT.value:
 				self.data_a_name = 'sctrl_omni.qw_IMU'
@@ -265,11 +265,17 @@ class CrazyflieGimbal2D:
 		self._cf.close_link()
 
 
-def getOmniRef(alpha, beta):
-	R_Bi_i_d = np.array([[np.cos(beta), 0, np.sin(beta)],
-							[np.sin(alpha)*np.sin(beta), np.cos(alpha), -np.sin(alpha)*np.cos(beta)], 
-							[-np.cos(alpha)*np.sin(beta), np.sin(alpha), np.cos(alpha)*np.cos(beta)]])
-	quat_r = utils.rot2quat3(R_Bi_i_d)
+def getOmniRef(th1, th2, th3):
+	c1 = np.cos(th1)
+	c2 = np.cos(th2)
+	c3 = np.cos(th3)
+	s1 = np.sin(th1)
+	s2 = np.sin(th2)
+	s3 = np.sin(th3)
+	R_XYZ = np.array([[c2*c3, -s2, c2*s3],
+							[c1*s3+c3*s1*s2,c1*c3-s1*s2*s3,-c2*s1], 
+							[s1*s3-c1*c3*s2,c3*s1+c1*s2*s3,c1*c2]])
+	quat_r = utils.rot2quat3(R_XYZ)
 	return utils.quatCompress(quat_r)
 
 if __name__ == '__main__':
@@ -287,19 +293,9 @@ if __name__ == '__main__':
 
 	cmd_rate = CMD_RATE # 200Hz
 	t = 0
-
-	if RefType == REF_TYPE.REF_TYPE_STEP.value:
-		RefGen = StepReferenceGenerator(THRUST_CONST)
-		T_final = 6
-	elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
-		RefGen = TrajReferenceGenerator(THRUST_CONST)
-		T_final = 20
-	elif RefType == REF_TYPE.REF_TYPE_THRUST.value:
-		RefGen = ThrustReferenceGenerator(THRUST_CONST)
-		T_final = 10
-	elif RefType == REF_TYPE.REF_TYPE_PWM.value:
-		RefGen = ThrustReferenceGenerator(THRUST_CONST)
-		T_final = 4
+ 
+	RefGen = G3DReferenceGenerator(THRUST_CONST)
+	T_final = 10
 
 	ctrl_thread = Thread(target=RefGen.run)
 	ctrl_thread.start()
@@ -307,16 +303,13 @@ if __name__ == '__main__':
 	print("start_time = %s" % start_time)
 
 	while t < T_final:
-		le.alpha = RefGen.alpha
-		le.beta = RefGen.beta
+		le.CompQuat = getOmniRef(RefGen.roll, RefGen.pitch, RefGen.yaw)
 		le.thrust = RefGen.thrust
-		if ControllerType == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
-			le.CompQuat = getOmniRef(le.alpha, le.beta)
 		le._update_motors()
 
 		t += cmd_rate
 		time.sleep(cmd_rate)
-		logger.log_append(le.timest, RefGen.alpha, RefGen.beta, le.data_a, le.data_b, le.data_c, le.data_d)
+		logger.log_append(le.timest, RefGen.roll, RefGen.pitch, le.data_a, le.data_b, le.data_c, le.data_d)
 
 	le._stop_crazyflie()
 	RefGen.stop_controller = True
