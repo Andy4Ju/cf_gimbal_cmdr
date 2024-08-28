@@ -35,19 +35,19 @@ class StepReferenceGenerator:
 			self.alpha = 0
 			self.beta = 0
 			self.thrust = self.thrust_constant
-		elif tnow < 2:
-			self.alpha = 0.0
+		elif tnow < 3:
+			self.alpha = 0.5
 			self.beta = 0
 			self.thrust = self.thrust_constant	
 		elif tnow < 4:
 			self.alpha = 0
 			self.beta = 0
 			self.thrust = self.thrust_constant
-		elif tnow < 5:
+		elif tnow < 6:
 			self.alpha = 0
 			self.beta = 0.5
 			self.thrust = self.thrust_constant
-		elif tnow < 6:
+		elif tnow < 7:
 			self.alpha = 0
 			self.beta = 0
 			self.thrust = self.thrust_constant
@@ -183,7 +183,7 @@ class G3DReferenceGenerator:
 			self.thrust = self.thrust_constant*tnow/3
 		elif tnow < 5:
 			self.roll = 0
-			self.pitch = 0.6
+			self.pitch = 0.8
 			self.yaw = 0
 			self.thrust = self.thrust_constant
 		elif tnow < 6:

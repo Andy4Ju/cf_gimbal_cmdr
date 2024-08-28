@@ -20,10 +20,10 @@ logging.basicConfig(level=logging.ERROR)
 '''Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
 
 '''Set the URL of your crazyflie target, add a new URL in parameter.py '''
-ControlTarget = URL.QC_ITRI_URL.value
+ControlTarget = URL.QC_SCISR2_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
-THRUST_CONST = 0.4
+THRUST_CONST = 0.3
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
 RefType = REF_TYPE.REF_TYPE_STEP.value 
@@ -86,8 +86,9 @@ class CrazyflieGimbal2D:
 
 			if SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value or SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_JALPHA.value:
 				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
-									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode', 'mtype']
-				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 150, 150, 1.5, 170, 170, 3.3, SubGimbal2DType, MotorType]
+									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode']
+				# self.gain_value = [15.2, 0.26, 0, 15.2, 0.157, 0, 150, 150, 2.5, 180, 180, 3.3, SubGimbal2DType, MotorType]
+				self.gain_value = [13.5, 0.1, 0, 15.2, 0.157, 0, 200, 200, 7.5, 240, 240, 7.3, 0]
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_OFL.value:
 				self.gain_name = ['ofl_ld1','ofl_ld2','cmode', 'mtype']
@@ -101,6 +102,11 @@ class CrazyflieGimbal2D:
 				self.gain_name = ['M1','M2','M3','M4','cmode', 'mtype']
 				val = 65000
 				self.gain_value = [val, val, val, val, SubGimbal2DType,MotorType]
+    
+			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PD.value:
+				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb','cmode']
+				# self.gain_value = [430, 720, 25, 900, 675, 75, SubGimbal2DType]
+				self.gain_value = [350, 250, 37, 900, 675, 75, SubGimbal2DType]
     
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_THRUST.value:
 				self.gain_name = ['cmode', 'mtype']
@@ -225,6 +231,9 @@ class CrazyflieGimbal2D:
 	def _update_motors(self):
 		self._cf.commander.send_twod(self.index, self.base_q[0], self.base_q[1], self.base_q[2], self.base_q[3], self.alpha, self.beta, self.thrust)
 
+	def _send_zero_command(self):
+		self._cf.commander.send_twod(0, 0, 0, 0, 0, 0, 0, 0)
+
 	def _stop_crazyflie(self):
 		self._cf.commander.send_stop_setpoint()
 		self._cf.close_link()
@@ -241,13 +250,15 @@ if __name__ == '__main__':
 	time.sleep(0.25)
 	logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, LogType, folder_name=DATA_FOLDER_NAME)
 	time.sleep(4)
+ 
+	le._send_zero_command()
 
 	cmd_rate = CMD_RATE # 200Hz
 	t = 0
 
 	if RefType == REF_TYPE.REF_TYPE_STEP.value:
 		RefGen = StepReferenceGenerator(THRUST_CONST)
-		T_final = 6
+		T_final = 8
 	elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
 		RefGen = TrajReferenceGenerator(THRUST_CONST)
 		T_final = 20

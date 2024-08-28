@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.ERROR)
 '''Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
 
 '''Set the URL of your crazyflie target, add a new URL in parameter.py '''
-ControlTarget = URL.QC_ITRI_URL.value
+ControlTarget = URL.QC_Gimbal3D_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
 THRUST_CONST = 0.3
@@ -32,7 +32,7 @@ RefType = REF_TYPE.REF_TYPE_THRUST.value
 '''Assign the controller type, 5= singleppid, 6 = omni, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value # 5= singleppid, 7=gimbal2D
 SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
-MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
+MotorType = MOTOR_TYPE.MOTOR_NORMAL.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
 LogType = LOG_TYPE.LOG_TYPE_QUAT.value

@@ -127,6 +127,14 @@ class ab_logger:
 			plt.ylabel('u beta')
 			plt.grid(True)
 
+			plt.figure()
+			plt.plot(timestamp, ad, 'r--', timestamp, da, 'k')
+			plt.ylabel('angle (rad)')
+			plt.title('angle')
+			plt.xlabel('time (sec)')
+			plt.legend(['angle_ref','angle_fb'])
+			plt.grid(True)
+
 		elif LogType == LOG_TYPE.LOG_TYPE_PWM_CMD.value: # Unit in Newton
 			plt.subplot(221)
 			plt.plot(timestamp, da, 'r')
