@@ -47,6 +47,7 @@ TYPE_BASE = 8
 TYPE_THRUST = 9
 TYPE_TWOD = 10
 TYPE_OMNI = 11
+TYPE_THREE_D = 12
 
 TYPE_META_COMMAND_NOTIFY_SETPOINT_STOP = 0
 
@@ -242,4 +243,13 @@ class Commander():
         pk = CRTPPacket()
         pk.port = CRTPPort.COMMANDER_GENERIC
         pk.data = struct.pack('<BIffff', TYPE_OMNI, compQuat, wx_r, wy_r, wz_r, thrust)
+        self._cf.send_packet(pk)
+    
+    def send_three_d(self, compQuat, wx_r, wy_r, wz_r, thrust):
+        """
+        send commands for 3-D
+        """
+        pk = CRTPPacket()
+        pk.port = CRTPPort.COMMANDER_GENERIC
+        pk.data = struct.pack('<BIffff', TYPE_THREE_D, compQuat, wx_r, wy_r, wz_r, thrust)
         self._cf.send_packet(pk)
