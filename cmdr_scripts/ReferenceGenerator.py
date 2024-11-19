@@ -194,7 +194,7 @@ class G3DReferenceGenerator:
 		elif tnow < 8:
 			self.roll = 0.6
 			self.pitch = 0
-			self.yaw = 0
+			self.yaw = 0.2
 			self.thrust = self.thrust_constant
 		elif tnow < 9.5:
 			self.roll = 0

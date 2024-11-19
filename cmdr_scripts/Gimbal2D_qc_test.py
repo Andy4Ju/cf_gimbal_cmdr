@@ -30,7 +30,7 @@ RefType = REF_TYPE.REF_TYPE_STEP.value
 
 '''Assign the controller type, 5= singleppid, 6 = omni, 7=gimbal2D.'''
 ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PD.value
 MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
@@ -106,7 +106,8 @@ class CrazyflieGimbal2D:
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PD.value:
 				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb','cmode']
 				# self.gain_value = [430, 720, 25, 900, 675, 75, SubGimbal2DType]
-				self.gain_value = [350, 250, 37, 900, 675, 75, SubGimbal2DType]
+				self.gain_value = [300, 10, 50, 900, 2, 75, SubGimbal2DType]
+				# self.gain_value = [360, 1, 42, 900, 2, 75, SubGimbal2DType]
     
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_THRUST.value:
 				self.gain_name = ['cmode', 'mtype']
