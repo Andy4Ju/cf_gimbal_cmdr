@@ -203,3 +203,56 @@ class G3DReferenceGenerator:
 			self.thrust = self.thrust_constant
 		else:
 			self.roll = 0; self.pitch = 0; self.yaw = 0; self.thrust = 0
+
+
+class WaveReferenceGenerator:
+	def __init__(self, thrust, roll_wave, pitch_wave, yaw_wave, wave_start_times, wave_amplitude, wave_frequency):
+		self.roll = 0
+		self.pitch = 0
+		self.yaw = 0
+		self.thrust = 0 # 42598
+		self.thrust_constant = thrust
+		self.controller_rate = 0.01
+		
+		self.controller_start_time = time.time()
+		self.stop_controller = False
+
+		self.waveforms = {"roll": roll_wave, "pitch": pitch_wave, "yaw": yaw_wave}
+		self.wave_start_times = wave_start_times
+		self.wave_amplitude = wave_amplitude
+		self.wave_frequency = wave_frequency
+		
+		print("controller_start_time = %s" % self.controller_start_time)
+			
+	def run(self):
+		last_loop_time = time.time()
+		while not self.stop_controller:
+			current_time = time.time()
+			if current_time - last_loop_time > self.controller_rate:
+				tnow = current_time - self.controller_start_time
+				self.test_G3D(tnow)
+				last_loop_time = current_time
+				
+			else:
+				time.sleep(0.002)
+
+	def test_G3D(self, tnow):
+
+		for axis in ["roll", "pitch", "yaw"]:
+			start_time = self.wave_start_times.get(axis, 0)
+			if tnow >= start_time:
+				wave = self.waveforms.get(axis, "0")
+				amplitude = self.wave_amplitude.get(axis, 0)
+				frequency = self.wave_frequency.get(axis, 0)
+				if wave == "sin":
+					command = amplitude * np.sin(2 * np.pi * frequency * (tnow - start_time))
+				elif wave == "cos":
+					command = amplitude * np.cos(2 * np.pi * frequency * (tnow - start_time))
+				else:
+					command = 0
+				setattr(self, axis, command)
+
+			else:
+				setattr(self, axis, 0)
+
+				

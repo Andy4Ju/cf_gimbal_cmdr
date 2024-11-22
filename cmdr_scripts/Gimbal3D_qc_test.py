@@ -298,8 +298,20 @@ if __name__ == '__main__':
 
 	cmd_rate = CMD_RATE # 200Hz
 	t = 0
+
+	waveforms = {"roll": "sin", "pitch": "cos", "yaw": "0"}
+	wave_start_times = {"roll": 2, "pitch": 3, "yaw": 0}
+	wave_amplitude = {"roll": 30, "pitch": 20, "yaw": 0}
+	wave_frequency = {"roll": 0.5, "pitch": 0.25, "yaw": 0}
  
-	RefGen = G3DReferenceGenerator(THRUST_CONST)
+	# RefGen = G3DReferenceGenerator(THRUST_CONST)
+	RefGen = WaveReferenceGenerator(THRUST_CONST,
+								waveforms["roll"],
+                                waveforms["pitch"],
+                                waveforms["yaw"],
+                                wave_start_times,
+                                wave_amplitude,
+                                wave_frequency)
 	T_final = 10
 
 	ctrl_thread = Thread(target=RefGen.run)
