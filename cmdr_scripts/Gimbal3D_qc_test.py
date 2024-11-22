@@ -12,6 +12,7 @@ from parameter import *
 import math
 import cflib
 from cflib.crazyflie import Crazyflie
+import utils
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -20,21 +21,21 @@ logging.basicConfig(level=logging.ERROR)
 '''Make sure your dependencies are ready, please refer to: https://github.com/SFWen2/cf_gimbal_cmdr/blob/main/README.md '''
 
 '''Set the URL of your crazyflie target, add a new URL in parameter.py '''
-ControlTarget = URL.QC_SCISR2_URL.value
+ControlTarget = URL.QC_Gimbal3D_URL.value
 
 '''Assign Thrust Constant 0 ~ 0.58 N '''
 THRUST_CONST = 0.3
 
 '''Assign the reference type, 1 = step, 2 = ramp. Modify ReferenceGenerator.py if you have other references'''
-RefType = REF_TYPE.REF_TYPE_STEP.value 
+RefType = REF_TYPE.REF_TYPE_THRUST.value 
 
 '''Assign the controller type, 5= singleppid, 6 = omni, 7=gimbal2D.'''
-ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_GIMBAL2D.value # 5= singleppid, 7=gimbal2D
-SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PD.value
-MotorType = MOTOR_TYPE.MOTOR_UPGRADE.value
+ControllerType = CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value # 5= singleppid, 7=gimbal2D
+SubGimbal2DType = SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value
+MotorType = MOTOR_TYPE.MOTOR_NORMAL.value
 
 '''Assign the date log type, angular position / velocity or pwm command'''
-LogType = LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value
+LogType = LOG_TYPE.LOG_TYPE_QUAT.value
 
 '''Assign the folder name of logged data, the default name is log_date'''
 DATA_FOLDER_NAME = 'log_' + time.strftime("%m%d")
@@ -63,6 +64,7 @@ class CrazyflieGimbal2D:
 		self.alpha = 0
 		self.beta = 0
 		self.thrust = 0
+		self.CompQuat = 0
 		self.index = index
 		self.base_q = np.array([1,0,0,0])
 		self.group_name = ''
@@ -86,9 +88,8 @@ class CrazyflieGimbal2D:
 
 			if SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID.value or SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PID_JALPHA.value:
 				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb', 
-									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode']
-				# self.gain_value = [15.2, 0.26, 0, 15.2, 0.157, 0, 150, 150, 2.5, 180, 180, 3.3, SubGimbal2DType, MotorType]
-				self.gain_value = [13.5, 0.1, 0, 15.2, 0.157, 0, 200, 200, 7.5, 240, 240, 7.3, 0]
+									'pgainas', 'igainas', 'dgainas', 'pgainbs', 'igainbs', 'dgainbs', 'cmode', 'mtype']
+				self.gain_value = [15.5, 0.26, 0, 17.2, 0.157, 0, 150, 150, 1.5, 170, 170, 3.3, SubGimbal2DType, MotorType]
 
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_OFL.value:
 				self.gain_name = ['ofl_ld1','ofl_ld2','cmode', 'mtype']
@@ -103,12 +104,6 @@ class CrazyflieGimbal2D:
 				val = 65000
 				self.gain_value = [val, val, val, val, SubGimbal2DType,MotorType]
     
-			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_PD.value:
-				self.gain_name = ['pgaina', 'igaina', 'dgaina', 'pgainb', 'igainb', 'dgainb','cmode']
-				# self.gain_value = [430, 720, 25, 900, 675, 75, SubGimbal2DType]
-				self.gain_value = [300, 10, 50, 900, 2, 75, SubGimbal2DType]
-				# self.gain_value = [360, 1, 42, 900, 2, 75, SubGimbal2DType]
-    
 			elif SubGimbal2DType == SUB_GIMBAL2D_TYPE.SUB_GIMBAL2D_TYPE_THRUST.value:
 				self.gain_name = ['cmode', 'mtype']
 				self.gain_value = [SubGimbal2DType, MotorType]
@@ -120,10 +115,40 @@ class CrazyflieGimbal2D:
 				self.data_d_name = 'sctrl_Gimbal2D.u_beta'
 
 			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
-				self.data_a_name = 'pm.vbat'
+				self.data_a_name = 'sctrl_Gimbal2D.t_m1'
 				self.data_b_name = 'sctrl_Gimbal2D.t_m2'
 				self.data_c_name = 'sctrl_Gimbal2D.t_m3'
 				self.data_d_name = 'sctrl_Gimbal2D.t_m4'
+
+		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
+			self.group_name = 'sparam_omni'
+			self.config_name ='sctrl_omni'
+			self.set_group = 'sparam_omni.{}'
+			self.gain_name = ['Kwx', 'Kix', 'Kdx', 
+                     'Kwy', 'Kiy', 'Kdy', 
+                     'Kwz', 'Kiz', 'Kdz',
+                     'KRx', 'KRix', 
+                     'KRy', 'KRiy', 
+                     'KRz', 'KRiz',
+                     'Kffx', 'Kffy']
+			self.gain_value = [600, 1200, 15, 
+                      800, 1500, 10, 
+                      350, 600, 3.5, 
+                      6, 0.3, 
+                      6.7, 0.1, 
+                      5, 7, 
+                      0.6, 0.6]
+			if log_type == LOG_TYPE.LOG_TYPE_QUAT.value:
+				self.data_a_name = 'sctrl_omni.qw_IMU'
+				self.data_c_name = 'sctrl_omni.qx_IMU'
+				self.data_b_name = 'sctrl_omni.qy_IMU'
+				self.data_d_name = 'sctrl_omni.qz_IMU'
+
+			elif log_type == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
+				self.data_a_name = 'sctrl_omni.t_m1'
+				self.data_b_name = 'sctrl_omni.t_m2'
+				self.data_c_name = 'sctrl_omni.t_m3'
+				self.data_d_name = 'sctrl_omni.t_m4'
 
 		elif controller_type == CONTROLLER_TYPE.CONTROLLER_TYPE_SINGLEPPID.value:
 			self.group_name = 'sparam_ppid'
@@ -214,6 +239,7 @@ class CrazyflieGimbal2D:
 		self.data_b = (data[self.data_b_name], 0)[math.isnan(data[self.data_b_name]) == True]
 		self.data_c = (data[self.data_c_name], 0)[math.isnan(data[self.data_c_name]) == True]
 		self.data_d = (data[self.data_d_name], 0)[math.isnan(data[self.data_d_name]) == True]
+		# print('quat=%s,%s,%s,%s'%(self.data_a,self.data_b,self.data_c,self.data_d))
 
 	def _connection_failed(self, link_uri, msg):
 		"""Callback when connection initial connection fails (i.e no Crazyflie
@@ -230,14 +256,32 @@ class CrazyflieGimbal2D:
 		print('Disconnected from %s' % link_uri)
 
 	def _update_motors(self):
-		self._cf.commander.send_twod(self.index, self.base_q[0], self.base_q[1], self.base_q[2], self.base_q[3], self.alpha, self.beta, self.thrust)
-
-	def _send_zero_command(self):
-		self._cf.commander.send_twod(0, 0, 0, 0, 0, 0, 0, 0)
+		if ControllerType == CONTROLLER_TYPE.CONTROLLER_TYPE_OMNI.value:
+			self._cf.commander.send_omni(self.CompQuat, 0, 0, 0, self.thrust)
+		else:
+			self._cf.commander.send_twod(self.index, self.base_q[0], self.base_q[1], self.base_q[2], self.base_q[3], self.alpha, self.beta, self.thrust)
 
 	def _stop_crazyflie(self):
 		self._cf.commander.send_stop_setpoint()
 		self._cf.close_link()
+
+
+def getOmniRef(th1, th2, th3):
+	c1 = np.cos(th1)
+	c2 = np.cos(th2)
+	c3 = np.cos(th3)
+	s1 = np.sin(th1)
+	s2 = np.sin(th2)
+	s3 = np.sin(th3)
+	# R_XYZ = np.array([[c2*c3, -s2, c2*s3],
+	# 						[c1*s3+c3*s1*s2,c1*c3-s1*s2*s3,-c2*s1], 
+	# 						[s1*s3-c1*c3*s2,c3*s1+c1*s2*s3,c1*c2]])
+	R_ZYX = np.array([[c2*c3, s1*s2*c3-c1*s3, c1*s2*c3+s1*s3],
+							[c2*s3,s1*s2*s3+c1*c3,c1*s2*s3-s1*c3], 
+							[-s2,s1*c2,c1*c2]])
+	quat_r = utils.rot2quat3(R_ZYX)
+	# print('quat_r=%s'%quat_r)
+	return utils.quatCompress(quat_r)
 
 if __name__ == '__main__':
 
@@ -251,24 +295,12 @@ if __name__ == '__main__':
 	time.sleep(0.25)
 	logger = ab_logger(CMD_RATE, ControllerType, SubGimbal2DType, LogType, folder_name=DATA_FOLDER_NAME)
 	time.sleep(4)
- 
-	le._send_zero_command()
 
 	cmd_rate = CMD_RATE # 200Hz
 	t = 0
-
-	if RefType == REF_TYPE.REF_TYPE_STEP.value:
-		RefGen = StepReferenceGenerator(THRUST_CONST)
-		T_final = 8
-	elif RefType == REF_TYPE.REF_TYPE_RAMP.value:
-		RefGen = TrajReferenceGenerator(THRUST_CONST)
-		T_final = 20
-	elif RefType == REF_TYPE.REF_TYPE_THRUST.value:
-		RefGen = ThrustReferenceGenerator(THRUST_CONST)
-		T_final = 10
-	elif RefType == REF_TYPE.REF_TYPE_PWM.value:
-		RefGen = ThrustReferenceGenerator(THRUST_CONST)
-		T_final = 4
+ 
+	RefGen = G3DReferenceGenerator(THRUST_CONST)
+	T_final = 10
 
 	ctrl_thread = Thread(target=RefGen.run)
 	ctrl_thread.start()
@@ -276,14 +308,13 @@ if __name__ == '__main__':
 	print("start_time = %s" % start_time)
 
 	while t < T_final:
-		le.alpha = RefGen.alpha
-		le.beta = RefGen.beta
+		le.CompQuat = getOmniRef(RefGen.roll, RefGen.pitch, RefGen.yaw)
 		le.thrust = RefGen.thrust
 		le._update_motors()
 
 		t += cmd_rate
 		time.sleep(cmd_rate)
-		logger.log_append(le.timest, RefGen.alpha, RefGen.beta, le.data_a, le.data_b, le.data_c, le.data_d)
+		logger.log_append(le.timest, RefGen.roll, RefGen.pitch, le.data_a, le.data_b, le.data_c, le.data_d)
 
 	le._stop_crazyflie()
 	RefGen.stop_controller = True

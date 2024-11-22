@@ -5,6 +5,7 @@ import time
 import numpy as np
 import evaluateFbkInfo as eva
 from parameter import REF_TYPE, LOG_TYPE
+import utils
 
 class ab_logger:
 	"""
@@ -20,6 +21,8 @@ class ab_logger:
 			self.log_memory = [["timestamp", "alpha_d", "beta_d", "alpha_m", "beta_m", "u_alpha", "u_beta"]]
 		elif self.LogType == LOG_TYPE.LOG_TYPE_PWM_CMD.value:
 			self.log_memory = [["timestamp", "alpha_d", "beta_d", "cmd_m1", "cmd_m2", "cmd_m3", "cmd_m4"]]
+		elif self.LogType == LOG_TYPE.LOG_TYPE_QUAT.value:
+			self.log_memory = [["timestamp", "alpha_d", "beta_d", "qw_IMU", "qx_IMU", "qy_IMU", "qz_IMU"]]
 
 	def log_append(self, timestamp, ad, bd, da, db, dc, dd):
 		"""
@@ -65,6 +68,14 @@ class ab_logger:
     
 		rows_drop = list(filter(None, rows))
 		return rows_drop
+
+	# def _rpy_XYZ(self, quat0, quat1, quat2, quat3):
+	# 	rpy = np.array([0.0,0.0,0.0])
+	# 	roll = np.arctan2(-2*(quat2*quat3-quat0*quat1), 1-2*(quat1**2+quat3**2))
+	# 	pitch = np.arctan2(-2*(quat1*quat3-quat0*quat2), 1-2*(quat2**2+quat3**2))
+	# 	yaw = np.arcsin(2*(quat1*quat2+quat0*quat3))
+	# 	rpy = [roll,pitch,yaw]
+	# 	return rpy
 
 	def plot(self, RefType, LogType):
 		n = len(self.log_memory)
@@ -116,6 +127,14 @@ class ab_logger:
 			plt.ylabel('u beta')
 			plt.grid(True)
 
+			plt.figure()
+			plt.plot(timestamp, ad, 'r--', timestamp, da, 'k')
+			plt.ylabel('angle (rad)')
+			plt.title('angle')
+			plt.xlabel('time (sec)')
+			plt.legend(['angle_ref','angle_fb'])
+			plt.grid(True)
+
 		elif LogType == LOG_TYPE.LOG_TYPE_PWM_CMD.value: # Unit in Newton
 			plt.subplot(221)
 			plt.plot(timestamp, da, 'r')
@@ -133,6 +152,37 @@ class ab_logger:
 			plt.plot(timestamp, dd, 'm')
 			plt.ylabel('m4 (N)')
 			plt.grid(True)
+			print('last vbat = ', da[-1])
+
+		elif LogType == LOG_TYPE.LOG_TYPE_QUAT.value:
+			# rpy = self._rpy_XYZ(da, db, dc, dd)
+			# quat = np.array([da, db, dc, dd])
+			rpy = utils.rpy_YZX(da, db, dc, dd)
+
+			plt.subplot(311)
+			plt.plot(timestamp,ad,'b--', timestamp,rpy[1], 'r')
+			plt.ylabel('angle (rad)')
+			plt.title('Roll')
+			plt.xlim([0, 10])
+			plt.ylim([-1, 1])
+			plt.grid(True)
+
+			plt.subplot(312)
+			plt.plot(timestamp,bd,'b--', timestamp, rpy[0], 'r')
+			plt.ylabel('angle (rad)')
+			plt.title('Pitch')
+			plt.xlim([0, 10])
+			plt.ylim([-1, 1])
+			plt.grid(True)
+
+			plt.subplot(313)
+			plt.plot(timestamp, rpy[2], 'r')
+			plt.ylabel('angle (rad)')
+			plt.xlim([0, 10])
+			plt.ylim([-1, 1])
+			plt.title('Yaw')
+			plt.grid(True)
+
 
 		if RefType == REF_TYPE.REF_TYPE_STEP.value:
 			[Alpha_Tr, Alpha_Mp, ATset] = eva.getStepInfo(ad, da, self.Ts)
@@ -148,5 +198,5 @@ class ab_logger:
 			Alpha_error_rmse =  eva.getRMSInfo(ad, da, self.Ts)
 			Beta_error_rmse =  eva.getRMSInfo(bd, dc, self.Ts)
 			print('Alpha_error_rmse = %s, Beta_error_rmse = %s' %(Alpha_error_rmse, Beta_error_rmse))
-
+   
 		plt.show()
