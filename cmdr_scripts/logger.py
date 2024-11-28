@@ -24,13 +24,13 @@ class ab_logger:
 		elif self.LogType == LOG_TYPE.LOG_TYPE_QUAT.value:
 			self.log_memory = [["timestamp", "alpha_d", "beta_d", "qw_IMU", "qx_IMU", "qy_IMU", "qz_IMU"]]
 
-	def log_append(self, timestamp, ad, bd, da, db, dc, dd):
+	def log_append(self, timestamp, ad, bd, cd, da, db, dc, dd):
 		"""
 		timestamp = round(timestamp,3)
 		e = round(e,3)
 		d = round(d,3)
 		"""
-		self.log_memory.append([timestamp, ad, bd, da, db, dc, dd])
+		self.log_memory.append([timestamp, ad, bd, cd, da, db, dc, dd])
 
 	def savelog(self):
 		# print(self.log_memory)
@@ -81,12 +81,13 @@ class ab_logger:
 		n = len(self.log_memory)
 		log_memory_array = np.asarray(self.log_memory[1:n])
 		timestamp = (log_memory_array[:, 0] - log_memory_array[0, 0]) * 0.001
-		ad = log_memory_array[:, 1]
-		bd = log_memory_array[:, 2]
-		da = log_memory_array[:, 3]
-		db = log_memory_array[:, 4]
-		dc = log_memory_array[:, 5]
-		dd = log_memory_array[:, 6]
+		ad = log_memory_array[:, 1] # RefRoll
+		bd = log_memory_array[:, 2] # RefPitch
+		cd = log_memory_array[:, 3] # RefYaw
+		da = log_memory_array[:, 4] # qw
+		db = log_memory_array[:, 5] # qy
+		dc = log_memory_array[:, 6] # qx
+		dd = log_memory_array[:, 7] # qz
 
 		if LogType == LOG_TYPE.LOG_TYPE_ANGPOS_TRQ.value:
 			if RefType == REF_TYPE.REF_TYPE_RAMP.value:
@@ -176,7 +177,7 @@ class ab_logger:
 			plt.grid(True)
 
 			plt.subplot(313)
-			plt.plot(timestamp, rpy[2], 'r')
+			plt.plot(timestamp,cd, 'b--', timestamp, rpy[2], 'r')
 			plt.ylabel('angle (rad)')
 			plt.xlim([0, 10])
 			plt.ylim([-1, 1])
